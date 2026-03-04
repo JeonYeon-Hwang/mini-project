@@ -59,16 +59,16 @@ def create_card():
 @app.route('/food/card/show', methods=['GET'])
 def show_cards():
    all_cards = list(db.cards.find({}).sort('card_duedate', 1))  
-   return jsonify({'result' : 'success', 'cards' : all_cards})
+   return render_template('index.html', cards = all_cards)
 
 
 
 #특정 카드의 댓글을 보여주는 api
-@app.route('/food/<int:card_id>/comments', methods=['GET'])
+@app.route('/food/<string:card_id>/comments', methods=['GET'])
 def show_card_comments(card_id):
    query =  {'_id': ObjectId(card_id)}
    dedicated_comments = list(db.comments.find(query).sort('comment_sent_time', 1))
-   return jsonify({'result' : 'success', 'comments' : dedicated_comments })
+   return render_template('index.html', comments = dedicated_comments)
 
 
 
@@ -92,7 +92,7 @@ def create_comments():
    }
 
    db.comments.insert_one(comment)  
-   return jsonify({'result' : 'success'})
+   return jsonify({'result' : 'success', 'msg': '댓글이 등록되었습니다!'})
 
 
 
@@ -106,7 +106,7 @@ def join_clud():
       {'_id' : card_id_receive },
       {'$push': { 'card_members' : "user_id-임시"}}
    )
-   return jsonify({'result' : 'success'})
+   return jsonify({'result' : 'success', 'msg': '가입이 완료되었습니다!'})
 
 
 
