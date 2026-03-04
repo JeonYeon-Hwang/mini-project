@@ -49,6 +49,8 @@ def signin():
     db.users.insert_one(user)
     return jsonify({'result': 'success'})
 
+
+
 #추가함 로그인 api
 @app.route('/food/login', methods=['POST'])
 def login():
@@ -79,15 +81,19 @@ def create_card():
    user_id_receive = request.form['user_id_give']
    card_title_receive = request.form['card_title_give']
    card_content_receive = request.form['card_content_give']
+   # 1. 프론트에서 보낸 문자열 받기 ("2026-03-31T23:59")
    card_duedate_receive = request.form['card_duedate_give']
    card_url_receive = request.form['card_url_give']
 
-   now = time
+   now = int(time.time())
+   clean_date = card_duedate_receive.replace('T', ' ')
+   due_timestamp = int(time.mktime(time.strptime(clean_date, '%Y-%m-%d %H:%M')))
+
    card = {
       'user_id' : user_id_receive,
       'card_title' : card_title_receive,
       'card_text' : card_content_receive,
-      'card_duedate' : card_duedate_receive,
+      'card_duedate' : due_timestamp,
       'card_created_date' : now,
       'card_members' : [ ],
       'card_url' : card_url_receive,
@@ -103,7 +109,16 @@ def create_card():
 @app.route('/food/card/show', methods=['GET'])
 def show_cards():
    all_cards = list(db.cards.find({}).sort('card_created_date', 1))  
-   return render_template('index.html', cards = all_cards)
+   
+   for card in all_cards:
+      if '_id' in card:
+         card['_id'] = str(card['_id'])
+         card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
+
+   return jsonify({'result': 'success', 'cards': all_cards})
+
+   # return jsonify({'result' : 'success', 'cards' : all_cards})
+   # return render_template('index.html', cards = all_cards)
 
 
 
@@ -123,7 +138,7 @@ def create_comments():
    user_id_receive = request.form['user_id_give']
    comment_receive = request.form['comment_give']
 
-   now = time
+   now = int(time.time())
    # user_id = db.users.get_user_id()
    nickname = db.users.find_one({'_id' : "user_id-임시"}).get('nick_name')
 
@@ -182,7 +197,7 @@ def exit_club():
 def scheduled_job():
    print("스캐줄링 작동")
 
-   now = time
+   now = int(time.time())
    db.cards.update_many(
       {'card_duedate' : {'$lte' : now }},
       {'$set' : { 'is_alive' : False}}
