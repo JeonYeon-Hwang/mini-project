@@ -1,6 +1,12 @@
 from flask import Flask, render_template, jsonify, request
 app = Flask(__name__)
 
+#추가함
+import jwt
+import datetime
+import hashlib
+SECRET_KEY = "welcometothejungle"
+
 import time
 import requests
 
@@ -8,25 +14,62 @@ from bs4 import BeautifulSoup
 from bson.objectid import ObjectId
 from apscheduler.schedulers.background import BackgroundScheduler
 from pymongo import MongoClient
-client = MongoClient('mongodb://test:test@52.79.109.78', 27017)
+client = MongoClient('mongodb://korobuster001:blueskY114@52.79.125.68', 27017)
 db = client.dbjungle
 
 
 
-#기본 화면 api
+# 기본 화면 api
 @app.route('/')
 def home():
    return render_template('index.html')
 
 
 
-#로그인 api
+#추가함 회원가입 api
+@app.route('/food/signin', methods=['POST'])
+def signin():
+    id_receive = request.form['id_give']
+    pw_receive = request.form['pw_give']
+    nickname_receive = request.form['nickname_give']
+    slack_url_receive = request.form['slack_url_give']
 
+    pw_hash = hashlib.sha256(pw_receive.encode('utf-8')).hexdigest()
 
+    existing_user = db.users.find_one({'id': id_receive})
+    if existing_user:
+        return jsonify({'result': 'fail', 'message': '이미 존재하는 아이디입니다'})
 
+    user = {
+        'id': id_receive,
+        'pw': pw_hash,
+        'nickname': nickname_receive,
+        'slack_url': slack_url_receive
+    }
+    db.users.insert_one(user)
+    return jsonify({'result': 'success'})
 
-#회원가입 api
+#추가함 로그인 api
+@app.route('/food/login', methods=['POST'])
+def login():
+    id_receive = request.form['id_give']
+    pw_receive = request.form['pw_give']
 
+    pw_hash = hashlib.sha256(pw_receive.encode('utf-8')).hexdigest()
+    user = db.users.find_one({'id': id_receive, 'pw': pw_hash})
+
+    if user:
+        token = jwt.encode(
+            {
+                'id': id_receive,
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=2)
+            },
+            SECRET_KEY,
+            algorithm='HS256'
+        )
+        return jsonify({'result': 'success', 'token': token})
+    else:
+        return jsonify({'result': 'fail', 'message': '아이디 또는 비밀번호가 틀렸습니다'})
 
 
 
