@@ -42,11 +42,13 @@ def create_card():
    card_duedate_receive = request.form['card_duedate_give']
    card_url_receive = request.form['card_url_give']
 
+   now = time
    card = {
       'user_id' : user_id_receive,
       'card_title' : card_title_receive,
       'card_text' : card_content_receive,
       'card_duedate' : card_duedate_receive,
+      'card_created_date' : now,
       'card_members' : [ ],
       'card_url' : card_url_receive,
       'is_alive' : True
@@ -60,7 +62,7 @@ def create_card():
 #모든 카드를 보여주는 api
 @app.route('/food/card/show', methods=['GET'])
 def show_cards():
-   all_cards = list(db.cards.find({}).sort('card_duedate', 1))  
+   all_cards = list(db.cards.find({}).sort('card_created_date', 1))  
    return render_template('index.html', cards = all_cards)
 
 
@@ -98,18 +100,22 @@ def create_comments():
 
 
 
-#특정 카드에 가입하는 api
+#특정 카드에 가입하는 api, 이미 가입 되었을 시 => 실패 메시지 발송
 @app.route('/food/join', methods=['POST'])
 def join_clud():
-   # user_id = db.users.get_user_id()
+   # user_id-임시 = db.users.get_user_id()
    card_id_receive = request.form['card_id_give']
+   card = db.cards.find_one({ '_id' : card_id_receive })
+   nickname = card.get('nick_name')
    
+   if "user_id-임시" in card.get('card_members', []):
+      return jsonify({'result' : 'fail', 'msg' : '이미 가입된 유저입니다.'})
+
    db.cards.update_one(
       {'_id' : card_id_receive },
-      {'$push': { 'card_members' : "user_id-임시"}}
+      {'$push': { 'card_members' : nickname }}
    )
    return jsonify({'result' : 'success', 'msg': '가입이 완료되었습니다!'})
-
 
 
 
@@ -125,10 +131,10 @@ def scheduled_job():
          
 
 
-
 scheduler = BackgroundScheduler()
 scheduler.add_job(scheduled_job, 'interval', minutes=10)
 scheduler.start()
+
 
 
 if __name__ == '__main__':
