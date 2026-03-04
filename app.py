@@ -2,14 +2,11 @@ from flask import Flask, render_template, jsonify, request
 app = Flask(__name__)
 
 import time
-
 import requests
+
 from bs4 import BeautifulSoup
-
 from bson.objectid import ObjectId
-
 from apscheduler.schedulers.background import BackgroundScheduler
-
 from pymongo import MongoClient
 client = MongoClient('mongodb://test:test@52.79.109.78', 27017)
 db = client.dbjungle
@@ -119,13 +116,32 @@ def join_clud():
 
 
 
-# 스캐줄러 메소드 입니다
+#특정 카드에서 탈퇴하는 api
+def exit_club():
+   # user_id-임시 = db.users.get_user_id()
+   card_id_receive = request.form['card_id_give']
+   card = db.cards.find_one({ '_id' : card_id_receive })
+   nickname = card.get('nick_name')
+
+   db.cards.up(
+      {'_id' : card_id_receive },
+      {'$pull': { 'card_members' : nickname }}
+   )
+   return jsonify({'result' : 'success', 'msg': '탈퇴가 완료되었습니다!'})
+
+
+
+#========== 다음은 기능용 메서드 입니다 ===========#
+
+
+
+# 스캐줄러 메서드 입니다
 def scheduled_job():
    print("스캐줄링 작동")
 
    now = time
    db.cards.update_many(
-      {'card_duedate' : {'$lt' : now }},
+      {'card_duedate' : {'$lte' : now }},
       {'$set' : { 'is_alive' : False}}
    )
          
