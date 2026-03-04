@@ -1,3 +1,4 @@
 print("안녕하세요. 연습이 되시나요?")
 print("안녕하세요. 정연 브랜치 입니다.")
 print("hello")
+print("bye!")
