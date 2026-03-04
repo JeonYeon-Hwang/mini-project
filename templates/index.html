@@ -54,28 +54,26 @@
                             <button type="submit" class="rounded-md p-2 hover:bg-zinc-100">✕</button>
                         </div>
 
-                        <form method="post" action="{{ url_for('login') }}" class="space-y-3">
-                            <div>
-                                <label class="mb-1 block text-sm text-zinc-700">아이디</label>
-                                <input name="username" class="w-full rounded-lg border px-3 py-2 outline-none focus:ring" />
-                            </div>
+                        <div>
+                            <label class="mb-1 block text-sm text-zinc-700">아이디</label>
+                            <input name="id_give" class="w-full rounded-lg border px-3 py-2 outline-none focus:ring" />
+                        </div>
 
-                            <div>
-                                <label class="mb-1 block text-sm text-zinc-700">비밀번호</label>
-                                <input type="password" name="password" class="w-full rounded-lg border px-3 py-2 outline-none focus:ring" />
-                            </div>
+                        <div>
+                            <label class="mb-1 block text-sm text-zinc-700">비밀번호</label>
+                            <input type="password" name="pw_give" class="w-full rounded-lg border px-3 py-2 outline-none focus:ring" />
+                        </div>
 
-                            <button class="mt-2 w-full rounded-lg bg-black py-2 text-white hover:bg-zinc-800">
-                                로그인
-                            </button>
+                        <button type="button" onclick="login()" class="mt-2 w-full rounded-lg bg-black py-2 text-white hover:bg-zinc-800">
+                            로그인
+                        </button>
 
-                            <button
-                                type="button"
-                                class="w-full rounded-lg border py-2 hover:bg-zinc-50"
-                                onclick="document.getElementById('loginModal').close(); document.getElementById('signinModal').showModal()">
-                                회원가입
-                            </button>
-                        </form>
+                        <button
+                            type="button"
+                            class="w-full rounded-lg border py-2 hover:bg-zinc-50"
+                            onclick="document.getElementById('loginModal').close(); document.getElementById('signinModal').showModal()">
+                            회원가입
+                        </button>
                     </div>
                 </form>
             </dialog>
@@ -89,22 +87,29 @@
                             <button type="submit" class="rounded-md p-2 hover:bg-zinc-100">✕</button>
                         </div>
 
-                        <form method="post" action="{{ url_for('signin') }}" class="space-y-3">
-                            <input type="hidden" name="form_type" value="signin" />
-                            <div>
-                                <label class="mb-1 block text-sm text-zinc-700">아이디</label>
-                                <input name="username" class="w-full rounded-lg border px-3 py-2 outline-none focus:ring" />
-                            </div>
+                        <div>
+                            <label class="mb-1 block text-sm text-zinc-700">아이디</label>
+                            <input name="id_give" class="w-full rounded-lg border px-3 py-2 outline-none focus:ring" />
+                        </div>
 
-                            <div>
-                                <label class="mb-1 block text-sm text-zinc-700">비밀번호</label>
-                                <input type="password" name="password" class="w-full rounded-lg border px-3 py-2 outline-none focus:ring" />
-                            </div>
+                        <div>
+                            <label class="mb-1 block text-sm text-zinc-700">비밀번호</label>
+                            <input type="password" name="pw_give" class="w-full rounded-lg border px-3 py-2 outline-none focus:ring" />
+                        </div>
 
-                            <button class="mt-2 w-full rounded-lg bg-black py-2 text-white hover:bg-zinc-800">
-                                가입
-                            </button>
-                        </form>
+                        <div>
+                            <label class="mb-1 block text-sm text-zinc-700">닉네임</label>
+                            <input name="nickname_give" class="w-full rounded-lg border px-3 py-2 outline-none focus:ring" />
+                        </div>
+
+                        <div>
+                            <label class="mb-1 block text-sm text-zinc-700">Slack URL</label>
+                            <input name="slack_url_give" class="w-full rounded-lg border px-3 py-2 outline-none focus:ring" />
+                        </div>
+
+                        <button type="button" onclick="signin()" class="mt-2 w-full rounded-lg bg-black py-2 text-white hover:bg-zinc-800">
+                            가입
+                        </button>
                     </div>
                 </form>
             </dialog>
@@ -123,7 +128,69 @@
         </div>
     </div>
     <script>
-    
+    //로그인
+        async function login() {
+            const id = document.querySelector("#loginModal input[name='id_give']").value.trim();
+            const pw = document.querySelector("#loginModal input[name='pw_give']").value;
+
+            if (!id || !pw) {
+                alert("아이디/비밀번호를 입력해주세요!");
+                return;
+            }
+
+            try {
+                const res = await fetch("/food/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id_give: id, pw_give: pw }),
+                });
+
+                const data = await res.json();
+            
+                if (data.result === "success") {
+                    location.reload();
+                } 
+                else {
+                    alert(data.message || "로그인 실패");
+                }
+            } 
+            catch (e) {
+                console.error(e);
+                alert("서버 통신 오류");
+            }
+        }
+
+    //회원가입
+        async function signup() {
+
+            const id = document.querySelector("#signupModal input[name='id_give']").value
+            const pw = document.querySelector("#signupModal input[name='pw_give']").value
+            const nickname = document.querySelector("#signupModal input[name='nickname_give']").value
+            const slack = document.querySelector("#signupModal input[name='slack_url_give']").value
+
+            const res = await fetch("/food/signin", {
+                method: "POST",
+                headers: {
+                "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    id_give: id,
+                    pw_give: pw,
+                    nickname_give: nickname,
+                    slack_url_give: slack
+                })
+            })
+
+            const data = await res.json()
+
+            if (data.result === "success") {
+                alert("회원가입 완료!")
+                document.getElementById("signupModal").close()
+            }
+            else {
+                alert(data.message)
+            }
+        }
 
     </script>
 </body>
