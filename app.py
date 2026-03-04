@@ -8,6 +8,8 @@ from bs4 import BeautifulSoup
 
 from bson.objectid import ObjectId
 
+from apscheduler.schedulers.background import BackgroundScheduler
+
 from pymongo import MongoClient
 client = MongoClient('mongodb://test:test@52.79.109.78', 27017)
 db = client.dbjungle
@@ -108,6 +110,25 @@ def join_clud():
    )
    return jsonify({'result' : 'success', 'msg': '가입이 완료되었습니다!'})
 
+
+
+
+# 스캐줄러 메소드 입니다
+def scheduled_job():
+   print("스캐줄링 작동")
+
+   now = time
+   db.cards.update_many(
+      {'card_duedate' : {'$lt' : now }},
+      {'$set' : { 'is_alive' : False}}
+   )
+         
+
+
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(scheduled_job, 'interval', minutes=10)
+scheduler.start()
 
 
 if __name__ == '__main__':
