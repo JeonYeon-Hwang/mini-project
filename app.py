@@ -39,7 +39,7 @@ from contents import FOOD_IMAGE_MAP
 MINIMUM_CARD_LIMIT = 15
 
 def get_current_user():
-   token = request.cookies.get("access_token")
+   token = request.cookies.get("mytoken")
    if not token:
       return None
 
@@ -55,10 +55,13 @@ def get_current_user():
 # 기본 화면 api
 @app.route('/')
 def home():
+   # 사용자 인증 확인
+   user = get_current_user()
+
    category = request.args.get('category')
    query = {'card_type': category} if category else {}
    cards = list(db.cards.find(query)
-               .sort([('is_alive', -1), ('card_duedate', 1)]) 
+               .sort([('is_alive', -1), ('card_duedate', 1)])
                .limit(MINIMUM_CARD_LIMIT))
 
    now = int(time.time())
@@ -77,12 +80,6 @@ def home():
                            cursor = last_card_id,
                            user=user,
                            )
-
-@app.post("/logout")
-def logout():
-    resp = make_response(redirect(url_for("home")))
-    resp.set_cookie("access_token", "", expires=0)  # 쿠키 삭제
-    return resp
 
 #추가함 회원가입 api
 @app.route('/food/signin', methods=['POST'])
@@ -129,7 +126,7 @@ def login():
          algorithm='HS256'
       )
       response = make_response(jsonify({'result': 'success' , 'token' : token }))
-      response.set_cookie('access_token', token, httponly=True, samesite='Lax')
+      response.set_cookie('mytoken', token, httponly=True, samesite='Lax')
       return response
    else:
       return jsonify({'result': 'fail', 'message': '아이디 또는 비밀번호가 틀렸습니다'})
@@ -155,6 +152,15 @@ def get_nickname():
    except jwt.InvalidTokenError:
       # 토큰 위조됨
       return jsonify({'result': 'fail', 'message': '유효하지 않은 토큰입니다'})
+
+
+# 로그아웃 API
+@app.route('/logout', methods=['POST'])
+def logout():
+   """로그아웃: mytoken 쿠키 삭제 후 메인 페이지로 리다이렉트"""
+   response = make_response(redirect('/'))
+   response.set_cookie('mytoken', '', expires=0)
+   return response
 
 
 

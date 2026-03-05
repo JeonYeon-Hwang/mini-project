@@ -13,10 +13,9 @@
 </head>
 
 <body class="bg-gray-100 text-gray-900">
-    <div>{{ user }}</div>
     <div class="min-h-screen">
         <div class="max-w-6xl mx-auto px-4 py-5">
-            <!--상단 바-->
+            <!--상단 바.!-->
             <header class="sticky top-0 z-40 -mx-4 px-4 py-5 bg-gray-100/80 backdrop-blur border-b border-gray-200">
                 <div class="max-w-6xl mx-auto px-4 py-3">
                     <div class="flex items-center gap-2">
@@ -116,14 +115,15 @@
                         <!--로그인 자리-->
                         <div class="flex items-center justify-end">
                             {% if user %}
-                                <span class="text-sm font-semibold text-gray-700">
-                                    {{ user.id }}님
+                            <div class="flex items-center gap-3">
+                                <span class="title px-5 py-4 w-48 break-words text-2xl text-center font-bold text-grey-900 bg-grey-500 rounded-full">
+                                    {{ user.nickname }} 님
                                 </span>
 
                                 <form method="post" action="{{ url_for('logout') }}">
                                     <button
                                         type="submit"
-                                        class="px-3 py-1.5 text-sm font-medium text-white bg-gray-800 rounded-lg hover:bg-gray-700">
+                                        class="whitespace-nowrap px-4 py-3 text-xl font-semibold text-white bg-gray-800 rounded-lg hover:bg-gray-700 transition">
                                         로그아웃
                                     </button>
                                 </form>
@@ -134,7 +134,7 @@
                                     type="button"
                                     id="openLoginBtn"
                                     onclick="document.getElementById('loginModal').showModal()"
-                                    class="px-4 py-2 text-sm font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-800">
+                                    class="whitespace-nowrap whitespace-nowrappx-4 px-4 py-3 text-xl font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-800">
                                     로그인
                                 </button>
 
@@ -244,7 +244,7 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        //로그인
+        // 로그인
         function login2() {
 
             let id = $('#id_login').val();
@@ -268,6 +268,14 @@
                 }
             });
         }
+
+        // BFCache에서 페이지 복원 시 새로고침 (로그인 상태 반영)
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                // BFCache에서 복원된 경우
+                location.reload();
+            }
+        });
 
         //회원가입
         function signin2() {
@@ -456,6 +464,7 @@
             slider.scrollLeft = scrollLeft - walk;
         });
     </script>
+
 </body>
 
 </html>
