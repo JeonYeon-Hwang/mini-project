@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, make_response
 app = Flask(__name__)
 
 #추가함
@@ -70,7 +70,9 @@ def login():
          SECRET_KEY,
          algorithm='HS256'
       )
-      return jsonify({'result': 'success', 'token': token})
+      response = make_response(jsonify({'result': 'success' , 'token' : token }))
+      response.set_cookie('access_token', token, httponly=True, samesite='Lax')
+      return response
    else:
       return jsonify({'result': 'fail', 'message': '아이디 또는 비밀번호가 틀렸습니다'})
 
