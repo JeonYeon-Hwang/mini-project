@@ -40,6 +40,8 @@ def home():
    category = request.args.get('category')
    query = {'card_type': category} if category else {}
    cards = list(db.cards.find(query).sort('card_duedate', 1).limit(MINIMUM_CARD_LIMIT))
+   cards.sort(key=lambda x: x.get('is_alive', False), reverse=True)
+   
    for card in cards:
       card['_id'] = str(card['_id'])
       card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
@@ -178,6 +180,7 @@ def create_card():
 @app.route('/food/card/show', methods=['GET'])
 def show_cards():
    all_cards = list(db.cards.find({}).sort('card_duedate', 1))  
+   all_cards.sort(key=lambda x: x.get('is_alive', False), reverse=True)
    
    for card in all_cards:
       if '_id' in card:
