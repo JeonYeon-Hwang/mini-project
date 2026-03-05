@@ -10,13 +10,23 @@
           <span class="text-lg font-bold text-gray-400 mt-1">{{ card.card_duedate }}</span>
         </div>
         <div class="absolute right-0 top-0 flex gap-2 text-gray-500 font-semibold text-sm sm:text-base">
-          <button type="button" class="p-2 hover:bg-gray-200 rounded-xl transition cursor-pointer">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-            </svg>
-          </button>
+          <div class="relative">
+            <button type="button" onclick="toggleArticleMenu(event)"
+              class="p-2 hover:bg-gray-200 rounded-xl transition cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+              </svg>
+            </button>
+            <div id="articleMenuDropdown"
+              class="hidden absolute right-0 top-full mt-1 w-36 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-30">
+              <button onclick="onEditArticleClick()"
+                class="w-full text-center px-4 py-3 text-xl font-bold text-gray-700 hover:bg-gray-100 transition border-b border-gray-100">수정하기</button>
+              <button onclick="onDeleteArticleClick()"
+                class="w-full text-center px-4 py-3 text-xl font-bold text-red-600 hover:bg-red-50 transition">삭제하기</button>
+            </div>
+          </div>
         </div>
       </div>
       <h2 class="text-xl sm:text-4xl font-bold text-black mt-4 mb-8 line-clamp-2 leading-snug">{{card.card_title}}</h2>
@@ -112,14 +122,57 @@
 </div>
 
 
+<script type="application/json" id="cardDataJson">
+  {{ card | tojson | safe }}
+</script>
+
 <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 <script>
-  // 소켓 체팅 로직
+
+  const UserRole = Object.freeze({
+    AUTHOR: 'author',
+    MEMBER: 'member',
+    GUEST: 'guest'
+  });
+
   const chatBox = document.getElementById('chatBox');
   const messageInput = document.getElementById('messageInput');
   const socket = io();
 
-  const myNickname = '{{ my_nickname }}';
+
+  let nickname = "";
+  const writer = '{{ card.nickname }}';
+  const members = JSON.parse('{{ card.card_members | tojson | safe }}');
+
+  let userRole = UserRole.GUEST;
+
+  function initUserRole() {
+    if (nickname && nickname === writer) {
+      userRole = UserRole.AUTHOR;
+    } else if (nickname && members.includes(nickname)) {
+      userRole = UserRole.MEMBER;
+    } else {
+      userRole = UserRole.GUEST;
+    }
+  }
+
+  async function checkCookieValid() {
+
+    const response = await fetch('/food/get_nickname')
+    
+    alert(response.status);
+      const data = await response.json();
+
+      if (data.result === 'success') {
+        
+        alert(data.nickname);
+        return;
+      }
+    alert("로그인 쿠키 없음");
+  }
+
+  checkCookieValid();
+  initUserRole();
 
   let userId = sessionStorage.getItem('userId');
   if (!userId) {
@@ -225,6 +278,42 @@
 
     //@app.route('/food/exit', methods=['POST']) 
     document.querySelector(`.member-badge[data-member="${memberName}"]`)?.remove();
+  }
+
+  function toggleArticleMenu(event) {
+    event.stopPropagation();
+    const dropdown = document.getElementById('articleMenuDropdown');
+    dropdown.classList.toggle('hidden');
+  }
+
+  document.addEventListener('click', (event) => {
+    const dropdown = document.getElementById('articleMenuDropdown');
+    if (dropdown && !dropdown.classList.contains('hidden') && !event.target.closest('.relative')) {
+      dropdown.classList.add('hidden');
+    }
+  });
+
+  function onEditArticleClick() {
+    const dropdown = document.getElementById('articleMenuDropdown');
+    if (dropdown) dropdown.classList.add('hidden');
+
+    const cardData = JSON.parse(document.getElementById('cardDataJson').textContent);
+    if (typeof openEditModal === 'function') {
+      openEditModal(cardData);
+    } else {
+      console.error("openEditModal is not defined. Make sure article_add.html is loaded.");
+    }
+  }
+
+  function onDeleteArticleClick() {
+    const dropdown = document.getElementById('articleMenuDropdown');
+    if (dropdown) dropdown.classList.add('hidden');
+
+    if (confirm("정말로 삭제하시겠습니까?")) {
+
+      // fetch('/food/card/delete', ...) 등
+      alert("삭제");
+    }
   }
 </script>
 {% endblock %}

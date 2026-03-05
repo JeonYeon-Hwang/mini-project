@@ -120,16 +120,17 @@ def login():
 
 
 
-#토큰 검증 확인
-@app.route('/food/identification', methods=['POST'])
-def identification():
-   token_receive = request.form['token_give']
+#닉네임
+@app.route('/food/get_nickname', methods=['GET'])
+def get_nickname():
+   token_receive = request.cookies.get('access_token')
    
    try:
       # 토큰 해독
       payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
-      find_id = payload['id']  # 토큰 안에서 아이디 꺼내기
-      return jsonify({'result': 'success', 'id': find_id})
+      user_id = payload['id']  
+      user = db.users.find_one({'id': user_id}, {'_id': False, 'pw': False})
+      return jsonify({'result': 'success', 'nickname': user['nickname']})
    
    except jwt.ExpiredSignatureError:
       # 토큰 만료됨 (2시간 지남)
@@ -142,7 +143,6 @@ def identification():
 
 
 #카드를 등록하는 api
-
 @app.route('/food/card/create', methods=['POST'])
 def create_card():
    token_receive = request.cookies.get('mytoken')
