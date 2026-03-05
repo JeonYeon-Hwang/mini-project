@@ -162,8 +162,8 @@ def show_cards():
          card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
          card['card_type'] = FOOD_IMAGE_MAP.get(card['card_type'])
 
-   return jsonify({'result' : 'success', 'cards' : all_cards})
-   # return render_template('index.html', cards = all_cards)
+   # return jsonify({'result' : 'success', 'cards' : all_cards})
+   return render_template('index.html', cards = all_cards)
 
 
 
@@ -178,8 +178,8 @@ def show_card_comments(card_id):
          comments['_id'] = str(comments['_id'])
          comments['comment_sent_time'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(comments['comment_sent_time']))
 
-   return jsonify({'result' : dedicated_comments})
-   # return render_template('index.html', comments = dedicated_comments)
+   # return jsonify({'result' : dedicated_comments})
+   return render_template('index.html', comments = dedicated_comments)
 
 
 
