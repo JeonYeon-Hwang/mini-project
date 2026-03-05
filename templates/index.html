@@ -180,7 +180,7 @@
                                 </div>
 
                                 <div class="font-semibold text-gray-800">
-                                    {{ "{:,}".format(card.price) }}원
+                                    {{ "{:,}".format(card.price | default(0) | int )}}원
                                 </div>
                             </div>
 
@@ -297,11 +297,14 @@
         });
 
         async function loadMore(){
+            //noCard
+            if (nextCursor.value == "noCard") { hasMore = false; }
+
             //로딩중이다
             if (loading) return;
 
             //이제 없다구요ㅜ
-            if (!hasmore) {
+            if (!hasMore) {
                 noMore.classList.remove("hidden");
                 return;
             }
@@ -313,7 +316,18 @@
             spinner.classList.remove("hidden");
             
             //새 카드 요청
-            const res = await fetch('/food/cards?&cursor=${cursor}&as_of=${snapshotTime}', {credentials: "include"});
+            const params = new URLSearchParams();
+            if (cursor) params.set("cursor", cursor);
+            if (snapshotTime) params.set("as_of", snapshotTime);
+
+            const url = `/food/cards?${params.toString()}`;
+
+            const res = await fetch(url, { method: "GET", credentials: "include" });
+
+            if (!res.ok) {
+                console.error(await res.text());
+                return;
+            }
             const data = await res.json();
 
             if (data.result === "success" && data.html) {
