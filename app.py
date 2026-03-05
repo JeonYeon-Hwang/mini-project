@@ -87,12 +87,6 @@ def home():
                            user=user,
                            )
 
-@app.post("/logout")
-def logout():
-    resp = make_response(redirect(url_for("home")))
-    resp.set_cookie("access_token", "", expires=0)  # 쿠키 삭제
-    return resp
-
 #추가함 회원가입 api
 @app.route('/food/signin', methods=['POST'])
 def signin():
