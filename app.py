@@ -22,6 +22,8 @@ from bs4 import BeautifulSoup
 from bson.objectid import ObjectId
 from apscheduler.schedulers.background import BackgroundScheduler
 from pymongo import MongoClient
+
+from contents import FOOD_IMAGE_MAP
 client = MongoClient('mongodb://korobuster001:blueskY114@52.79.125.68', 27017)
 db = client.dbjungle
 
@@ -98,7 +100,6 @@ def login():
 @app.route('/food/identification', methods=['POST'])
 def identification():
     token_receive = request.form['token_give']
-    print("토큰 검증 실행")
     
     try:
         # 토큰 해독
@@ -159,6 +160,7 @@ def show_cards():
       if '_id' in card:
          card['_id'] = str(card['_id'])
          card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
+         card['card_type'] = FOOD_IMAGE_MAP.get(card['card_type'])
 
    return jsonify({'result' : 'success', 'cards' : all_cards})
    # return render_template('index.html', cards = all_cards)
