@@ -94,10 +94,20 @@ def identification():
         # 토큰 위조됨
         return jsonify({'result': 'fail', 'message': '유효하지 않은 토큰입니다'})
 
-#카드를 등록하는 api
+#^^카드를 등록하는 api
 @app.route('/food/card/create', methods=['POST'])
 def create_card():
-   user_id_receive = request.form['user_id_give']
+   token_receive = request.form['token_give']
+
+   # 1. 토큰으로 user_id 찾기
+   try:
+      payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+      user_id_receive = payload['id']
+   except jwt.ExpiredSignatureError:
+      return jsonify({'result' : 'fail', 'message' : '로그인이 만료됐습니다'})
+   except jwt.InvalidTokenError:
+      return jsonify({'result': 'fail', 'massage': '유효하지 않은 토큰 입니다'})
+
    card_title_receive = request.form['card_title_give']
    card_content_receive = request.form['card_content_give']
    # 1. 프론트에서 보낸 문자열 받기 ("2026-03-31T23:59")
@@ -134,8 +144,8 @@ def show_cards():
          card['_id'] = str(card['_id'])
          card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
 
-   # return jsonify({'result' : 'success', 'cards' : all_cards})
-   return render_template('index.html', cards = all_cards)
+   return jsonify({'result' : 'success', 'cards' : all_cards})
+   #return render_template('index.html', cards = all_cards)
 
 
 
@@ -155,65 +165,92 @@ def show_card_comments(card_id):
 
 
 
-#댓글을 등록하는 api
+#^^댓글을 등록하는 api
 @app.route('/food/post/comments', methods=['POST'])
 def create_comments():
-   card_id_receive = request.form['card_id_give']
-   user_id_receive = request.form['user_id_give']
-   comment_receive = request.form['comment_give']
+    token_receive = request.form['token_give']
 
-   now = int(time.time())
-   user_data = db.users.find_one({'id': user_id_receive}, {'_id': False, 'pw': False})
-   nickname = user_data.get('nickname')
+    # 1. 토큰으로 user_id 찾기
+    try:
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+        user_id = payload['id']
+    except jwt.ExpiredSignatureError:
+        return jsonify({'result': 'fail', 'message': '로그인이 만료됐습니다'})
+    except jwt.InvalidTokenError:
+        return jsonify({'result': 'fail', 'message': '유효하지 않은 토큰입니다'})
 
-   comment = {
-      'card_id' : card_id_receive,
-      'user_id' : user_id_receive,
-      'nickname' : nickname,
-      'comment_sent_time': now,
-      'comment_text' : comment_receive
-   }
+    # 2. user_id로 닉네임 찾기
+    user_data = db.users.find_one({'id': user_id})
+    nickname = user_data.get('nickname')
 
-   db.comments.insert_one(comment)  
-   return jsonify({'result' : 'success', 'msg': '댓글이 등록되었습니다!'})
+    card_id_receive = request.form['card_id_give']
+    comment_receive = request.form['comment_give']
+    now = int(time.time())
 
+    comment = {
+        'card_id': card_id_receive,
+        'user_id': user_id,
+        'nickname': nickname,
+        'comment_sent_time': now,
+        'comment_text': comment_receive
+    }
 
+    db.comments.insert_one(comment)
+    return jsonify({'result': 'success', 'message': '댓글이 등록됐습니다!'})
 
-#특정 카드에 가입하는 api, 이미 가입 되었을 시 => 실패 메시지 발송
+#^^특정 카드에 가입하는 api, 이미 가입 되었을 시 => 실패 메시지 발송
 @app.route('/food/join', methods=['POST'])
-def join_clud():
+def join_club():
    card_id_receive = request.form['card_id_give']
-   user_id_receive = request.form['user_id_give']
-   
-   card = db.cards.find_one({ '_id' : ObjectId(card_id_receive)})
+   token_receive = request.form['token_give']
+
+   try:
+      payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+      user_id_receive = payload['id']
+   except jwt.ExpiredSignatureError:
+      return jsonify({'result': 'fail', 'message': '로그인이 만료됐습니다'})
+   except jwt.InvalidTokenError:
+      return jsonify({'result': 'fail', 'message': '유효하지 않은 토큰입니다'})
+
+   card = db.cards.find_one({'_id': ObjectId(card_id_receive)})
    user_data = db.users.find_one({'id': user_id_receive}, {'_id': False, 'pw': False})
    nickname = user_data.get('nickname')
-   
+
    if nickname in card.get('card_members', []):
-      return jsonify({'result' : 'fail', 'msg' : '이미 가입된 유저입니다.'})
+      return jsonify({'result': 'fail', 'msg': '이미 가입된 유저입니다.'})
 
    db.cards.update_one(
-      {'_id' : ObjectId(card_id_receive)},
-      {'$push': { 'card_members' : nickname }}
+      {'_id': ObjectId(card_id_receive)},
+      {'$push': {'card_members': nickname}}
    )
-   return jsonify({'result' : 'success', 'msg': '가입이 완료되었습니다!'})
+   return jsonify({'result': 'success', 'msg': '가입이 완료되었습니다!'})
 
 
 
-#특정 카드에서 탈퇴하는 api
+#^^특정 카드에서 탈퇴하는 api
 @app.route('/food/exit', methods=['POST'])
 def exit_club():
-   card_id_receive = request.form['card_id_give']
-   user_id_receive = request.form['user_id_give']
-   
-   user_data = db.users.find_one({'id': user_id_receive}, {'_id': False, 'pw': False})
-   nickname = user_data.get('nickname')
+    token_receive = request.form['token_give']
+    card_id_receive = request.form['card_id_give']
 
-   db.cards.update_one(
-      {'_id' : ObjectId(card_id_receive)},
-      {'$pull': { 'card_members' : nickname }}
-   )
-   return jsonify({'result' : 'success', 'msg': '탈퇴가 완료되었습니다!'})
+    # 1. 토큰으로 user_id 찾기
+    try:
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+        user_id = payload['id']
+    except jwt.ExpiredSignatureError:
+        return jsonify({'result': 'fail', 'message': '로그인이 만료됐습니다'})
+    except jwt.InvalidTokenError:
+        return jsonify({'result': 'fail', 'message': '유효하지 않은 토큰입니다'})
+
+    # 2. user_id로 닉네임 찾기
+    user_data = db.users.find_one({'id': user_id})
+    nickname = user_data.get('nickname')
+
+    db.cards.update_one(
+        {'_id': ObjectId(card_id_receive)},
+        {'$pull': {'card_members': nickname}}
+    )
+    return jsonify({'result': 'success', 'message': '탈퇴가 완료됐습니다!'})
 
 
 
