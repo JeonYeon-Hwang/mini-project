@@ -22,7 +22,7 @@
       <h2 class="text-xl sm:text-4xl font-bold text-black mt-4 mb-8 line-clamp-2 leading-snug">{{card.card_title}}</h2>
       <div class="flex items-center justify-end gap-3 mb-4">
         <img src="{{ card.card_type }}"
-          class="w-12 h-12 rounded-md object-cover cursor-pointer hover:opacity-80 transition"
+          class="w-10 h-10 rounded-md object-cover cursor-pointer hover:opacity-80 transition"
           onclick="onMenuClick(event, '{{ card._id }}')" />
         <span class="font-extrabold text-gray-700 text-3xl">{{ "{:,}".format(card.card_price | default(0) |
           int)}}원</span>
