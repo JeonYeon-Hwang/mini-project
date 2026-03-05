@@ -1,9 +1,14 @@
 from flask import Flask, render_template, jsonify, request, make_response
 
-#소켓 임포트
+#라우터 임포트
 from sockets.socket_message import socketio
 from routes.message import message_bp
 from routes.user import user_bp
+from routes.cards import food_bp;
+
+#db 임포트
+from db import db
+
 
 app = Flask(__name__)
 
@@ -11,6 +16,7 @@ app = Flask(__name__)
 socketio.init_app(app)
 app.register_blueprint(message_bp)
 app.register_blueprint(user_bp)
+app.register_blueprint(food_bp)
 
 #추가함
 import jwt
@@ -18,21 +24,19 @@ import datetime
 import hashlib
 SECRET_KEY = "welcometothejungle"
 
+
 import time
 import requests
 
 from bs4 import BeautifulSoup
 from bson.objectid import ObjectId
 from apscheduler.schedulers.background import BackgroundScheduler
-from pymongo import MongoClient
 from contents import FOOD_IMAGE_MAP
 
-client = MongoClient('mongodb://korobuster001:blueskY114@52.79.125.68', 27017)
-db = client.dbjungle
 
 
 # 서버에서 최초로 가져올 수 있는 카드 수
-MINIMUM_CARD_LIMIT = 30
+MINIMUM_CARD_LIMIT = 90
 
 # 기본 화면 api
 @app.route('/')
@@ -50,22 +54,10 @@ def home():
       card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
       card['card_type'] = FOOD_IMAGE_MAP.get(card['card_type'])
    return render_template('index.html', 
-                           cards = cards,
+                           cards = cards , 
                            snapshot_time = now,
                            cursor = last_card_id 
                            )
-
-
-
-# 카드 상세 화면 api
-@app.route('/food/<string:card_id>', methods=['GET'])
-def article(card_id):
-   card = db.cards.find_one({'_id': ObjectId(card_id)})
-   # print( "찾은 카드 " + card)
-   card['_id'] = str(card['_id'])
-   card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
-   # return jsonify({'result': 'success' , 'data' : card })
-   return render_template('article.html', card=card)
 
 
 
@@ -107,8 +99,8 @@ def login():
    if user:
       token = jwt.encode(
          {
-               'id': id_receive,
-               'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=2)
+            'id': id_receive,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=2)
          },
          SECRET_KEY,
          algorithm='HS256'
@@ -223,8 +215,8 @@ def show_card_comments(card_id):
          comments['_id'] = str(comments['_id'])
          comments['comment_sent_time'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(comments['comment_sent_time']))
 
-   # return jsonify({'result' : dedicated_comments})
-   return render_template('index.html', comments = dedicated_comments)
+   return jsonify({'result' : dedicated_comments})
+   # return render_template('index.html', comments = dedicated_comments)
 
 
 
