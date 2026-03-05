@@ -1,0 +1,72 @@
+<div class="w-full max-w-md bg-white rounded-2xl shadow-lg flex flex-col h-[600px]">
+    <div id="chatBox" class="flex-1 overflow-y-auto px-4 py-3 space-y-2">
+    </div>
+    <div class="px-4 py-3 border-t border-gray-200 flex gap-2">
+        <input
+            id="messageInput"
+            type="text"
+            class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-300 transition"
+        />
+        <button
+            onclick="sendMessage()"
+            class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
+        >
+            전송
+        </button>
+    </div>
+</div>
+
+<script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+<script>
+    const input = document.getElementById('messageInput');
+    const chatBox = document.getElementById('chatBox');
+    const socket = io();
+    let userId = sessionStorage.getItem('userId');
+    if (!userId) {
+        userId = Math.random().toString(36).substr(2, 9);
+        sessionStorage.setItem('userId', userId);
+    }
+
+    input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    function sendMessage() {
+        const text = input.value.trim();
+        if (!text) return;
+
+        input.value = '';
+        input.focus();
+
+        socket.emit('message', { text: text, userId: userId })
+    }
+
+    function appendMessage(text, sender) {
+        const wrapper = document.createElement('div');
+        wrapper.className = sender === 'me'
+            ? 'flex justify-end'
+            : 'flex justify-start';
+
+        const bubble = document.createElement('div');
+        bubble.className = sender === 'me'
+            ? 'bg-blue-500 text-white text-sm px-3 py-2 rounded-2xl rounded-br-sm max-w-[75%] break-words'
+            : 'bg-gray-100 text-gray-800 text-sm px-3 py-2 rounded-2xl rounded-bl-sm max-w-[75%] break-words';
+        bubble.textContent = text;
+
+        wrapper.appendChild(bubble);
+        chatBox.appendChild(wrapper);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    fetch('/messages')
+        .then(res => res.json())
+        .then(data => {
+            data.messages.forEach(msg => {
+                appendMessage(msg.text, msg.userId === userId ? 'me' : 'other');
+            });
+        });
+
+    socket.on('message', function(data) {
+        appendMessage(data.text, data.userId === userId ? 'me' : 'other');
+    });
+</script>
