@@ -95,12 +95,12 @@
     <div class="relative w-1/2 flex flex-col bg-white rounded-2xl shadow-md border border-blue-200 overflow-hidden">
       <!-- 최상위 플로팅 버튼 바 -->
       <div class="absolute top-3 left-3 right-3 flex justify-between z-20 pointer-events-none">
-        
+
         <button type="button" id="status-toggle-btn" onclick="onStatusToggleClick(event)"
           class="pointer-events-auto px-6 py-2 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white text-xl font-bold rounded-xl shadow-lg transition cursor-pointer">
           참여하기
         </button>
-        
+
         <button type="button" onclick="history.back()"
           class="pointer-events-auto w-14 h-14 flex items-center justify-center bg-white hover:bg-gray-100 active:bg-gray-200 rounded-xl shadow-lg border border-gray-200 transition cursor-pointer">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-gray-600" fill="none" viewBox="0 0 24 24"
@@ -226,9 +226,7 @@
   }
 
   initUserRole();
-=======
   const myNickname = '{{ user.nickname if user else "" }}';
->>>>>>> 4cada5b40d66cb2b37b0a808bc42128bbd883954
 
   let userId = sessionStorage.getItem('userId');
   if (!userId) {
@@ -243,7 +241,8 @@
     if (!text) return;
     messageInput.value = '';
     messageInput.focus();
-    socket.emit('message', { text, userId, nickname: myNickname });
+    // myNickname이 유효하면 사용, 아니면 nickname 사용
+    socket.emit('message', { text, userId, nickname: myNickname ? myNickname : (nickname || '') });
   }
 
   function appendMessage(text, sender, nickname = '') {
