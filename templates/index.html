@@ -274,7 +274,7 @@
                 }
             });
         }
-        
+
         //회원가입
         function signin2() {
             let id =$('#id_signin').val();
@@ -293,7 +293,7 @@
                 success: function (response) {
                     if (response['result'] == 'success'){
                         alert('회원가입 성공')
-                        
+
                         const modal = document.getElementById("signinModal");
                         closeModal(modal);
                     }
@@ -303,7 +303,7 @@
                 }
             });
         }
-        
+
         //modal close, form reset
         function closeModal(modalEl) {
             modalEl.close();
@@ -320,9 +320,9 @@
 
         let loading = false;
         let hasMore = true;
-        let snapshotTime = {{ snapshot_time | tojson}};
+        // let snapshotTime = {{ snapshot_time | tojson}};
 
-        nextCursor.value= {{ cursor | tojson}};
+        // nextCursor.value= {{ cursor | tojson}};
 
         //$(document).ready(function(){
         //    loadMore();
@@ -346,7 +346,7 @@
             //로딩 시작
             loading = true;
             spinner.classList.remove("hidden");
-            
+
             //새 카드 요청
             const params = new URLSearchParams();
             if (cursor) params.set("cursor", cursor);
@@ -378,7 +378,7 @@
         const io = new IntersectionObserver((entries)=>{if(entries[0].isIntersecting) loadMore();}, { rootMargin: "300px" });
 
         io.observe(sentinel);
-    
+
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
