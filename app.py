@@ -39,7 +39,7 @@ from contents import FOOD_IMAGE_MAP
 MINIMUM_CARD_LIMIT = 15
 
 def get_current_user():
-   token = request.cookies.get("access_token")
+   token = request.cookies.get("mytoken")
    if not token:
       return None
 
@@ -56,13 +56,7 @@ def get_current_user():
 @app.route('/')
 def home():
    # 사용자 인증 확인
-   try:
-      token_receive = request.cookies.get('mytoken')
-      payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
-      user_id = payload['id']
-      user = db.users.find_one({'id': user_id}, {'_id': 0, 'pw': 0})
-   except:
-      user = None
+   user = get_current_user()
 
    category = request.args.get('category')
    query = {'card_type': category} if category else {}
