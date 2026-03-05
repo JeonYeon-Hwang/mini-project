@@ -16,14 +16,14 @@
     <div class="min-h-screen">
         <div class="max-w-6xl mx-auto px-4 py-5">
             <!--상단 바-->
-            <header class="sticky top-0 z-40 -mx-4 px-4 py-3 bg-gray-100/80 backdrop-blur border-b border-gray-200">
+            <header class="sticky top-0 z-40 -mx-4 px-4 py-5 bg-gray-100/80 backdrop-blur border-b border-gray-200">
                 <div class="flex items-start justify-between gap-4">
                     <!-- 왼쪽: 카테고리 -->
                     <nav class="flex items-center gap-2 sm:gap-3 overflow-x-auto">
                         <button
                             type="button"
                             onclick="location.href='/'"
-                            class="px-3 py-2 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
+                            class="px-4 py-3 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
                                 hover:bg-white hover:shadow-sm border border-transparent
                                 {% if not request.args.get('category') %}bg-white border-gray-200 shadow-sm{% endif %}">
                             전체
@@ -32,7 +32,7 @@
                         <button
                             type="button"
                             onclick="location.href='/?category=돈까스·회·일식'"
-                            class="px-3 py-2 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
+                            class="px-4 py-3 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
                                 hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
                                 {% if request.args.get('category') == '돈까스·회·일식' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
                             돈까스·회·일식
@@ -41,7 +41,7 @@
                         <button
                             type="button"
                             onclick="location.href='/?category=피자'"
-                            class="px-3 py-2 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
+                            class="px-4 py-3 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
                                 hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
                                 {% if request.args.get('category') == '피자' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
                             피자
@@ -50,7 +50,7 @@
                         <button
                             type="button"
                             onclick="location.href='/?category=고기·구이'"
-                            class="px-3 py-2 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
+                            class="px-4 py-3 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
                                 hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
                                 {% if request.args.get('category') == '고기·구이' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
                             고기·구이
@@ -59,7 +59,7 @@
                         <button
                             type="button"
                             onclick="location.href='/?category=양식'"
-                            class="px-3 py-2 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
+                            class="px-4 py-3 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
                                 hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
                                 {% if request.args.get('category') == '양식' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
                             양식
@@ -68,7 +68,7 @@
                         <button
                             type="button"
                             onclick="location.href='/?category=치킨'"
-                            class="px-3 py-2 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
+                            class="px-4 py-3 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
                                 hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
                                 {% if request.args.get('category') == '치킨' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
                             치킨
@@ -77,7 +77,7 @@
                         <button
                             type="button"
                             onclick="location.href='/?category=중식'"
-                            class="px-3 py-2 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
+                            class="px-4 py-3 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
                                 hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
                                 {% if request.args.get('category') == '중식' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
                             중식
@@ -86,7 +86,7 @@
                         <button
                             type="button"
                             onclick="location.href='/?category=패스트푸드'"
-                            class="px-3 py-2 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
+                            class="px-4 py-3 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
                                 hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
                                 {% if request.args.get('category') == '패스트푸드' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
                             패스트푸드
@@ -95,7 +95,7 @@
                         <button
                             type="button"
                             onclick="location.href='/?category=분식'"
-                            class="px-3 py-2 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
+                            class="px-4 py-3 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
                                 hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
                                 {% if request.args.get('category') == '분식' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
                             분식
@@ -104,7 +104,7 @@
                         <button
                             type="button"
                             onclick="location.href='/?category=도시락'"
-                            class="px-3 py-2 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
+                            class="px-4 py-3 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
                                 hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
                                 {% if request.args.get('category') == '도시락' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
                             도시락
