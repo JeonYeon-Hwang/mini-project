@@ -92,6 +92,24 @@ def login():
       return jsonify({'result': 'fail', 'message': '아이디 또는 비밀번호가 틀렸습니다'})
 
 
+#^^토큰 검증 확인
+@app.route('/food/identification', methods=['POST'])
+def identification():
+    token_receive = request.form['token_give']
+    
+    try:
+        # 토큰 해독
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+        find_id = payload['id']  # 토큰 안에서 아이디 꺼내기
+        return jsonify({'result': 'success', 'id': find_id})
+    
+    except jwt.ExpiredSignatureError:
+        # 토큰 만료됨 (2시간 지남)
+        return jsonify({'result': 'fail', 'message': '로그인이 만료됐습니다'})
+    
+    except jwt.InvalidTokenError:
+        # 토큰 위조됨
+        return jsonify({'result': 'fail', 'message': '유효하지 않은 토큰입니다'})
 
 #카드를 등록하는 api
 @app.route('/food/card/create', methods=['POST'])
