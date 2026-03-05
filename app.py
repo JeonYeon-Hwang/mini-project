@@ -41,12 +41,18 @@ def home():
    query = {'card_type': category} if category else {}
    cards = list(db.cards.find(query).sort('card_duedate', 1).limit(MINIMUM_CARD_LIMIT))
    cards.sort(key=lambda x: x.get('is_alive', False), reverse=True)
-   
+
+   now = int(time.time())
+   last_card_id = str(cards[-1].get('_id'))
+
    for card in cards:
       card['_id'] = str(card['_id'])
       card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
       card['card_type'] = FOOD_IMAGE_MAP.get(card['card_type'])
-   return render_template('index.html', cards=cards)
+   return render_template('index.html', 
+                           cards = cards, 
+                           snapshot_time = now,
+                           cursor = last_card_id )
 
 
 # 카드 상세 화면 api
@@ -182,13 +188,19 @@ def show_cards():
    all_cards = list(db.cards.find({}).sort('card_duedate', 1))  
    all_cards.sort(key=lambda x: x.get('is_alive', False), reverse=True)
    
+   now = int(time.time())
+   last_card_id = str(all_cards[-1].get('_id'))
+
    for card in all_cards:
       if '_id' in card:
          card['_id'] = str(card['_id'])
          card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
          card['card_type'] = FOOD_IMAGE_MAP.get(card['card_type'])
 
-   return jsonify({'result' : 'success', 'cards' : all_cards})
+   return jsonify({'result' : 'success', 
+                   'cards' : all_cards, 
+                   'snapshot_time' : now,
+                   'cursor' : last_card_id})
    # return render_template('index.html', cards = all_cards)
 
 
