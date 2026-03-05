@@ -32,7 +32,7 @@
             </div>
 
             <div class="font-semibold text-gray-800">
-                {{ "{:,}".format(card.price) }}원
+                {{ "{:,}".format(card.price| default(0) | int )}}원
             </div>
         </div>
 
