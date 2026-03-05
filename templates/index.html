@@ -16,135 +16,141 @@
     <div class="min-h-screen">
         <div class="max-w-6xl mx-auto px-4 py-5">
             <!--상단 바-->
-            <header class="sticky top-0 z-40 -mx-4 px-4 py-3 bg-gray-100/80 backdrop-blur border-b border-gray-200">
-                <div class="flex items-start justify-between gap-4">
-                    <!-- 왼쪽: 카테고리 -->
-                    <nav class="flex items-center gap-2 sm:gap-3 overflow-x-auto">
-                        <button
-                            type="button"
-                            onclick="location.href='/'"
-                            class="px-3 py-2 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
-                                hover:bg-white hover:shadow-sm border border-transparent
-                                {% if not request.args.get('category') %}bg-white border-gray-200 shadow-sm{% endif %}">
-                            전체
-                        </button>
-
-                        <button
-                            type="button"
-                            onclick="location.href='/?category=돈까스·회·일식'"
-                            class="px-3 py-2 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
-                                hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
-                                {% if request.args.get('category') == '돈까스·회·일식' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
-                            돈까스·회·일식
-                        </button>
-
-                        <button
-                            type="button"
-                            onclick="location.href='/?category=피자'"
-                            class="px-3 py-2 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
-                                hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
-                                {% if request.args.get('category') == '피자' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
-                            피자
-                        </button>
-
-                        <button
-                            type="button"
-                            onclick="location.href='/?category=고기·구이'"
-                            class="px-3 py-2 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
-                                hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
-                                {% if request.args.get('category') == '고기·구이' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
-                            고기·구이
-                        </button>
-
-                        <button
-                            type="button"
-                            onclick="location.href='/?category=양식'"
-                            class="px-3 py-2 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
-                                hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
-                                {% if request.args.get('category') == '양식' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
-                            양식
-                        </button>
-
-                        <button
-                            type="button"
-                            onclick="location.href='/?category=치킨'"
-                            class="px-3 py-2 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
-                                hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
-                                {% if request.args.get('category') == '치킨' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
-                            치킨
-                        </button>
-
-                        <button
-                            type="button"
-                            onclick="location.href='/?category=중식'"
-                            class="px-3 py-2 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
-                                hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
-                                {% if request.args.get('category') == '중식' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
-                            중식
-                        </button>
-
-                        <button
-                            type="button"
-                            onclick="location.href='/?category=패스트푸드'"
-                            class="px-3 py-2 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
-                                hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
-                                {% if request.args.get('category') == '패스트푸드' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
-                            패스트푸드
-                        </button>
-
-                        <button
-                            type="button"
-                            onclick="location.href='/?category=분식'"
-                            class="px-3 py-2 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
-                                hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
-                                {% if request.args.get('category') == '분식' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
-                            분식
-                        </button>
-
-                        <button
-                            type="button"
-                            onclick="location.href='/?category=도시락'"
-                            class="px-3 py-2 rounded-xl text-3xl font-bold text-gray-900 whitespace-nowrap
-                                hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
-                                {% if request.args.get('category') == '도시락' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
-                            도시락
-                        </button>
-                    </nav>
-
-                    <!-- 오른쪽: 로그인-->
-                    <div class="relative shrink-0">
+            <header class="sticky top-0 z-40 -mx-4 px-4 py-5 bg-gray-100/80 backdrop-blur border-b border-gray-200">
+                <div class="max-w-6xl mx-auto px-4 py-3">
+                    <div class="flex items-center justify-end">
                         {% if user %}
-                            <button
-                                type="button"
-                                id="userMenuBtn"
-                                class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-gray-200
-                                    shadow-sm hover:shadow-md transition">
-                                <span class="text-sm sm:text-base font-semibold">{{ user.name }}</span>
-                                <svg class="w-4 h-4 text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z" clip-rule="evenodd"/>
-                                </svg>
-                            </button>
-
-                            <!-- 드롭다운 -->
-                            <div
-                                id="userMenu"
-                                class="hidden absolute right-0 mt-2 w-44 rounded-xl bg-white border border-gray-200 shadow-lg overflow-hidden">
-                                <form method="post" action="{{ url_for('logout') }}">
-                                <button type="submit" class="w-full text-left px-4 py-3 text-sm hover:bg-gray-50">
-                                    로그아웃
+                            <div class="relative">
+                                <button
+                                    id="userMenuBtn"
+                                    class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-900 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition"
+                                    type="button"
+                                    aria-haspopup="menu"
+                                    aria-expanded="false"
+                                    aria-controls="userMenu">
+                                    <span>{{ user.name }}</span>
+                                    <span class="text-xs text-gray-500">▾</span>
                                 </button>
-                                </form>
+                                <div
+                                    id="userMenu"
+                                    class="hidden absolute right-0 w-44 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden"
+                                    role="menu">
+                                    <form method="post" action="{{ url_for('logout') }}">
+                                        <button
+                                            type="submit"
+                                            class="w-full px-4 py-3 text-left text-sm hover:bg-gray-50"
+                                            role="menuitem">
+                                            로그아웃
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         {% else %}
                             <button
                                 type="button"
                                 id="openLoginBtn"
-                                class="px-4 py-2 rounded-xl bg-gray-900 text-white text-sm sm:text-base font-semibold
-                                    hover:bg-gray-800 transition shadow-sm"
-                                onclick="document.getElementById('loginModal').showModal()">
+                                onclick="document.getElementById('loginModal').showModal()"
+                                class="flex items-center justify-center px-5 py-3 text-xl font-semibold text-gray-900 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition">     
                                 로그인
                             </button>
                         {% endif %}
+                    </div>
+                </div>
+                <div class="max-w-6xl mx-auto px-4 py-3">
+                    <div class="flex items-center gap-2">
+                        <!--전체-->
+                        <button
+                            type="button"
+                            onclick="location.href='/'"
+                            class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
+                                hover:bg-white hover:shadow-sm border border-transparent
+                                {% if not request.args.get('category') %}bg-white border-gray-200 shadow-sm{% endif %}">
+                            전체
+                        </button>
+                        <!-- 카테고리 -->
+                        <nav id="categoryScroll" class="flex items-center gap-2 sm:gap-3 overflow-x-auto whitespace-nowrap
+                            [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ">
+                            <button
+                                type="button"
+                                onclick="location.href='/?category=돈까스·회·일식'"
+                                class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
+                                    hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
+                                    {% if request.args.get('category') == '돈까스·회·일식' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
+                                돈까스·회·일식
+                            </button>
+
+                            <button
+                                type="button"
+                                onclick="location.href='/?category=피자'"
+                                class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
+                                    hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
+                                    {% if request.args.get('category') == '피자' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
+                                피자
+                            </button>
+
+                            <button
+                                type="button"
+                                onclick="location.href='/?category=고기·구이'"
+                                class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
+                                    hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
+                                    {% if request.args.get('category') == '고기·구이' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
+                                고기·구이
+                            </button>
+
+                            <button
+                                type="button"
+                                onclick="location.href='/?category=양식'"
+                                class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
+                                    hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
+                                    {% if request.args.get('category') == '양식' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
+                                양식
+                            </button>
+
+                            <button
+                                type="button"
+                                onclick="location.href='/?category=치킨'"
+                                class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
+                                    hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
+                                    {% if request.args.get('category') == '치킨' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
+                                치킨
+                            </button>
+
+                            <button
+                                type="button"
+                                onclick="location.href='/?category=중식'"
+                                class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
+                                    hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
+                                    {% if request.args.get('category') == '중식' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
+                                중식
+                            </button>
+
+                            <button
+                                type="button"
+                                onclick="location.href='/?category=패스트푸드'"
+                                class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
+                                    hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
+                                    {% if request.args.get('category') == '패스트푸드' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
+                                패스트푸드
+                            </button>
+
+                            <button
+                                type="button"
+                                onclick="location.href='/?category=분식'"
+                                class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
+                                    hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
+                                    {% if request.args.get('category') == '분식' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
+                                분식
+                            </button>
+
+                            <button
+                                type="button"
+                                onclick="location.href='/?category=도시락'"
+                                class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
+                                    hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
+                                    {% if request.args.get('category') == '도시락' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
+                                도시락
+                            </button>
+                        </nav>
                     </div>
                 </div>
             </header>
@@ -154,7 +160,7 @@
                 <form method="dialog" class="p-0">
                     <div class="flex flex-col w-[min(92vw,420px)] p-6 gap-4 bg-white rounded-2xl shadow-xl">
                         <div class="flex items-center justify-between mb-4">
-                            <h2 class="text-lg font-semibold">로그인</h2>
+                            <h2 class="text-2xl font-semibold">로그인</h2>
                             <button 
                                 type="button"
                                 class="p-2 hover:bg-zinc-100 rounded-md"
@@ -164,19 +170,19 @@
                         </div>
 
                         <div class="flex flex-col gap-2">
-                            <label class="block mb-1 text-sm text-zinc-700">아이디</label>
+                            <label class="block mb-1 text-xl text-zinc-700">아이디</label>
                             <input id="id_login" class="w-full px-3 py-2 text-sm bg-white border border-zinc-300 rounded-lg outline-none focus:ring"/>
                         </div>
 
                         <div class="flex flex-col gap-2">
-                            <label class="block mb-1 text-sm text-zinc-700">비밀번호</label>
+                            <label class="block mb-1 text-xl text-zinc-700">비밀번호</label>
                             <input type="password" id="pw_login" class="w-full px-3 py-2 text-sm bg-white border border-zinc-300 rounded-lg outline-none focus:ring"/>
                         </div>
 
                         <div>
                             <button 
                                 type="button" 
-                                class="flex items-center justify-center w-full py-2 text-sm font-semibold text-white bg-black rounded-lg hover:bg-zinc-800 transition"
+                                class="flex items-center justify-center w-full py-2 text-xl font-semibold text-white bg-black rounded-lg hover:bg-zinc-800 transition"
                                 onclick="login2()">
                                 로그인
                             </button>
@@ -185,7 +191,7 @@
                         <div>
                             <button
                                 type="button"
-                                class="flex items-center justify-center w-full py-2 text-sm font-semibold bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50 transition"
+                                class="flex items-center justify-center w-full py-2 text-xl font-semibold bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50 transition"
                                 onclick="closeModal(document.getElementById('loginModal')); document.getElementById('signinModal').showModal()">
                                 회원가입
                             </button>
@@ -199,7 +205,7 @@
                 <form method="dialog" class="p-0">
                     <div class="flex flex-col w-[min(92vw,420px)] p-6 gap-4 bg-white rounded-2xl shadow-xl">
                         <div class="flex items-center justify-between mb-4">
-                            <h2 class="text-lg font-semibold">회원가입</h2>
+                            <h2 class="text-2xl font-semibold">회원가입</h2>
                             <button 
                                 type="button" 
                                 class="p-2 hover:bg-zinc-100 rounded-md"
@@ -209,28 +215,28 @@
                         </div>
 
                         <div class="flex flex-col gap-2">
-                            <label class="block mb-1 text-sm text-zinc-700">아이디</label>
+                            <label class="block mb-1 text-xl text-zinc-700">아이디</label>
                             <input id="id_signin" class="w-full px-3 py-2 text-sm bg-white border border-zinc-300 rounded-lg outline-none focus:ring"/>
                         </div>
 
                         <div class="flex flex-col gap-2">
-                            <label class="block mb-1 text-sm text-zinc-700">비밀번호</label>
+                            <label class="block mb-1 text-xl text-zinc-700">비밀번호</label>
                             <input type="password" id="pw_signin" class="w-full px-3 py-2 text-sm bg-white border border-zinc-300 rounded-lg outline-none focus:ring"/>
                         </div>
 
                         <div class="flex flex-col gap-2">
-                            <label class="mb-1 block text-sm text-zinc-700">닉네임</label>
+                            <label class="mb-1 block text-xl text-zinc-700">닉네임</label>
                             <input id="nickname_signin" class="w-full px-3 py-2 text-sm bg-white border border-zinc-300 rounded-lg outline-none focus:ring"/>
                         </div>
 
                         <div class="flex flex-col gap-2">
-                            <label class="mb-1 block text-sm text-zinc-700">Slack URL</label>
+                            <label class="mb-1 block text-xl text-zinc-700">Slack URL</label>
                             <input id="slack_url_signin" class="w-full px-3 py-2 text-sm bg-white border border-zinc-300 rounded-lg outline-none focus:ring"/>
                         </div>
 
                         <button 
                             type="button"
-                            class="flex items-center justify-center w-full py-2 text-sm font-semibold text-white bg-black rounded-lg hover:bg-zinc-800 transition"
+                            class="flex items-center justify-center w-full py-2 text-xl font-semibold text-white bg-black rounded-lg hover:bg-zinc-800 transition"
                             onclick="signin2()">
                             가입
                         </button>
@@ -384,6 +390,39 @@
         document.addEventListener('DOMContentLoaded', () => {
             startCountdowns()
         })
+    </script>
+    <!--카테고리 마우스 이동-->
+    <script>
+        const slider = document.getElementById("categoryScroll");
+
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        slider.addEventListener("mousedown", (e) => {
+            isDown = true;
+            slider.classList.add("cursor-grabbing");
+            startX = e.pageX - slider.offsetLeft;
+            scrollLeft = slider.scrollLeft;
+        });
+
+        slider.addEventListener("mouseleave", () => {
+            isDown = false;
+            slider.classList.remove("cursor-grabbing");
+        });
+
+        slider.addEventListener("mouseup", () => {
+            isDown = false;
+            slider.classList.remove("cursor-grabbing");
+        });
+
+        slider.addEventListener("mousemove", (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - slider.offsetLeft;
+            const walk = (x - startX) * 1.5;
+            slider.scrollLeft = scrollLeft - walk;
+        });
     </script>
 </body>
 
