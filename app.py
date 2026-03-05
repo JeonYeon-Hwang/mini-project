@@ -27,13 +27,27 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from db import db
 
 
+# 서버에서 최초로 가져올 수 있는 카드 수
+MINIMUM_CARD_LIMIT = 30
 
 # 기본 화면 api
 @app.route('/')
 def home():
-   return render_template('index.html')
+   category = request.args.get('category')
+   query = {'card_type': category} if category else {}
+   cards = list(db.cards.find(query).limit(MINIMUM_CARD_LIMIT))
+   for card in cards:
+      card['_id'] = str(card['_id'])
+      card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
+   return render_template('index.html', cards=cards)
 
-
+# 카드 상세 화면 api
+@app.route('/food/<string:card_id>')
+def article(card_id):
+    card = db.cards.find_one({'_id': ObjectId(card_id)})
+    card['_id'] = str(card['_id'])
+    card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
+    return render_template('article.html', card=card)
 
 #추가함 회원가입 api
 @app.route('/food/signin', methods=['POST'])
