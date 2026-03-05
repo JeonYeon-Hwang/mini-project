@@ -22,17 +22,12 @@ def article(card_id):
       token_receive = request.cookies.get('mytoken')
       payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
       user_id_receive = payload['id']
-      nickname = db.users.find_one({'id': user_id_receive}).get('nickname')
+      user = db.users.find_one({'id': user_id_receive}, {'_id': 0, 'pw': 0})
    except:
-      nickname = None  
-   pass
-   
-
+      user = None
 
    card = db.cards.find_one({'_id': ObjectId(card_id)})
-   # print( "찾은 카드 " + card)
    card['_id'] = str(card['_id'])
    card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
    card['card_type'] = FOOD_IMAGE_MAP.get(card['card_type'])
-   # return jsonify({'result': 'success' , 'data' : card })
-   return render_template('article.html', card=card, nickname = nickname )
+   return render_template('article.html', card=card, user=user)
