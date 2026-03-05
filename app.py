@@ -207,8 +207,80 @@ def create_card():
    db.cards.insert_one(card)
    return jsonify({'result' : 'success'})
 
+@app.route('/food/card/edit', methods=['POST'])
+def edit_card():
+   token_receive = request.cookies.get('mytoken')
 
+   # 1. 토큰으로 user_id 찾기
+   try:
+      payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+      user_id_receive = payload['id']
+   except jwt.ExpiredSignatureError:
+      return jsonify({'result' : 'fail', 'message' : '로그인이 만료됐습니다'})
+   except jwt.InvalidTokenError:
+      return jsonify({'result': 'fail', 'message': '유효하지 않은 토큰 입니다'})
 
+   card_id_receive = request.form.get('card_id')
+   card_title_receive = request.form['card_title_give']
+   card_content_receive = request.form['card_content_give']
+   card_duedate_receive = request.form['card_duedate_give']
+   card_url_receive = request.form['card_url_give']
+   card_price_receive = request.form['card_price_give']
+   card_type_receive = request.form['card_type_give']
+
+   clean_date = card_duedate_receive.replace('T', ' ')
+   try:
+      if clean_date.count(':') == 2:
+         due_timestamp = int(time.mktime(time.strptime(clean_date, '%Y-%m-%d %H:%M:%S')))
+      else:
+         due_timestamp = int(time.mktime(time.strptime(clean_date, '%Y-%m-%d %H:%M')))
+   except ValueError:
+       return jsonify({'result': 'fail', 'message': '날짜 형식이 올바르지 않습니다.'})
+
+   # 작성자 검증
+   card_data = db.cards.find_one({'_id': ObjectId(card_id_receive)})
+   if not card_data:
+      return jsonify({'result': 'fail', 'message': '존재하지 않는 글입니다.'})
+   if card_data.get('user_id') != user_id_receive:
+      return jsonify({'result': 'fail', 'message': '수정 권한이 없습니다 (작성자 전용).'})
+
+   update_data = {
+      'card_title' : card_title_receive,
+      'card_text' : card_content_receive,
+      'card_duedate' : due_timestamp,
+      'card_url' : card_url_receive,
+      'card_price' : card_price_receive,
+      "card_type" : card_type_receive,
+   }
+
+   db.cards.update_one({'_id': ObjectId(card_id_receive)}, {'$set': update_data})
+   return jsonify({'result' : 'success', 'message': '수정되었습니다!'})
+
+@app.route('/food/card/delete', methods=['POST'])
+def delete_card():
+   token_receive = request.cookies.get('mytoken')
+
+   # 1. 토큰으로 user_id 찾기
+   try:
+      payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+      user_id_receive = payload['id']
+   except jwt.ExpiredSignatureError:
+      return jsonify({'result' : 'fail', 'message' : '로그인이 만료됐습니다'})
+   except jwt.InvalidTokenError:
+      return jsonify({'result': 'fail', 'message': '유효하지 않은 토큰 입니다'})
+
+   card_id_receive = request.form.get('card_id')
+
+   # 작성자 검증
+   card_data = db.cards.find_one({'_id': ObjectId(card_id_receive)})
+   if not card_data:
+      return jsonify({'result': 'fail', 'message': '존재하지 않는 글입니다.'})
+   if card_data.get('user_id') != user_id_receive:
+      return jsonify({'result': 'fail', 'message': '권한이 없습니다.'})
+
+   db.cards.delete_one({'_id': ObjectId(card_id_receive)})
+   return jsonify({'result' : 'success', 'message': '삭제되었습니다.'})
+   
 #모든 카드를 보여주는 api
 @app.route('/food/card/show', methods=['GET'])
 def show_cards():
@@ -280,6 +352,14 @@ def create_comments():
    }
 
    db.comments.insert_one(comment)
+   
+   # 소켓 통신
+   socketio.emit('new_message', {
+      'text': comment_receive,
+      'userId': user_id,
+      'nickname': nickname
+   }, to=card_id_receive)
+
    return jsonify({'result': 'success', 'message': '댓글이 등록됐습니다!'})
 
 
@@ -309,17 +389,19 @@ def join_club():
       {'_id': ObjectId(card_id_receive)},
       {'$push': {'card_members': nickname}}
    )
-   return jsonify({'result': 'success', 'msg': '가입이 완료되었습니다!'})
+   return jsonify({'result': 'success', 'msg': '가입되었습니다!'})
 
 
 
-#^^특정 카드에서 탈퇴하는 api
+#^^특정 카드에서 탈퇴 api
 @app.route('/food/exit', methods=['POST'])
 def exit_club():
-   token_receive = request.form['token_give']
+   token_receive = request.cookies.get('mytoken')
    card_id_receive = request.form['card_id_give']
+   # 강퇴 대상이 넘어왔는지 확인 (선택적 파라미터)
+   target_nickname_receive = request.form.get('target_nickname')
 
-   # 1. 토큰으로 user_id 찾기
+   # 1. 토큰으로 내(요청자) user_id 찾기
    try:
       payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
       user_id = payload['id']
@@ -328,18 +410,27 @@ def exit_club():
    except jwt.InvalidTokenError:
       return jsonify({'result': 'fail', 'message': '유효하지 않은 토큰입니다'})
 
-   # 2. user_id로 닉네임 찾기
+   # 2. 내 닉네임 조회
    user_data = db.users.find_one({'id': user_id})
    nickname = user_data.get('nickname')
 
+   # 3. 삭제 대상 판별
+   if target_nickname_receive and target_nickname_receive != nickname:
+      card = db.cards.find_one({'_id': ObjectId(card_id_receive)})
+      if not card or card['user_id'] != user_id:
+         return jsonify({'result': 'fail', 'message': '권한이 없습니다.'})
+      remove_nickname = target_nickname_receive
+   else:
+      # 스스로 탈퇴하는 경우
+      remove_nickname = nickname
+
+   # 4. 멤버 리스트에서 제거
    db.cards.update_one(
       {'_id': ObjectId(card_id_receive)},
-      {'$pull': {'card_members': nickname}}
+      {'$pull': {'card_members': remove_nickname}}
    )
-   return jsonify({'result': 'success', 'message': '탈퇴가 완료됐습니다!'})
-
-
-
+   
+   return jsonify({'result': 'success', 'message': '탈퇴되었습니다.'})
 @app.route('/food/show_more/<int:page_num>')
 def show_more(page_num):
    limit = 9

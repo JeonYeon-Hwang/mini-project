@@ -22,15 +22,25 @@ def article(card_id):
    
    card = db.cards.find_one({'_id': ObjectId(card_id)})
    card['_id'] = str(card['_id'])
-   card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
-   card['card_type'] = FOOD_IMAGE_MAP.get(card['card_type'])
+   if card.get('card_duedate') and isinstance(card['card_duedate'], (int, float)):
+       card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
+   card['card_type'] = FOOD_IMAGE_MAP.get(card.get('card_type', ''))
+   
+   query =  {'card_id': card_id}
+   dedicated_comments = list(db.comments.find(query).sort('comment_sent_time', 1))
+   for c in dedicated_comments:
+      if '_id' in c:
+         c['_id'] = str(c['_id'])
+      if c.get('comment_sent_time') and isinstance(c['comment_sent_time'], (int, float)):
+         c['comment_sent_time'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(c['comment_sent_time']))
    
    return render_template('article.html', 
                            card = card, 
-                           user=user)
+                           user=user,
+                           comments=dedicated_comments)
 
 def get_current_user():
-   token = request.cookies.get("access_token")
+   token = request.cookies.get("mytoken")
    if not token:
       return None
 

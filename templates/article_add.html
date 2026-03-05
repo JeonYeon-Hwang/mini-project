@@ -127,15 +127,47 @@
     }
 
     async function submitArticle() {
-
         const isEdit = document.getElementById('card_id_edit').value !== '';
         const formData = new FormData(document.getElementById('articleForm'));
 
         if (isEdit) {
-            alert('수정');
+            try {
+                const response = await fetch('/food/card/edit', {
+                    method: 'POST',
+                    body: new URLSearchParams(formData)
+                });
+                const data = await response.json();
+
+                if (data.result === 'success') {
+                    alert(data.message);
+                    document.getElementById('articleAddModal').close();
+                    location.reload();
+                } else {
+                    alert(data.message || '에러가 발생했습니다.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('서버 연결에 실패했습니다.');
+            }
             return;
         }
-        alert('생성');
-    }
 
+        try {
+            const response = await fetch('/food/card/create', {
+                method: 'POST',
+                body: new URLSearchParams(formData)
+            });
+            const data = await response.json();
+
+            if (data.result === 'success') {
+                document.getElementById('articleAddModal').close();
+                location.href = '/';
+            } else {
+                alert(data.message || '에러가 발생했습니다.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('서버 연결에 실패했습니다.');
+        }
+    }
 </script>

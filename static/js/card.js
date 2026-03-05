@@ -24,6 +24,7 @@ function createCardHTML(card) {
     const diff = new Date(card.card_duedate) - new Date()
     const opacityClass = diff <= 0 ? 'opacity-50 pointer-events-none' : ''
     const membersHTML = (card.card_members || [])
+        .slice(1) // 작성자 제외
         .map(m => createMemberHTML(m, false))
         .join('')
 
@@ -90,10 +91,22 @@ function onCardClick(cardId) {
 
 function onIconClick(event, url) {
     event.stopPropagation()
-    console.log("메뉴 링크 이동");
+    if (url && url !== 'None' && url.trim() !== '') {
+        window.open(url, '_blank')
+    }
 }
 
 async function onMemberClick(event, nickname) {
     event.stopPropagation()
-    console.log(`멤버 ${nickname} 클릭`)
+    try {
+        const response = await fetch(`/food/profile?nickname=${encodeURIComponent(nickname)}`)
+        const data = await response.json()
+        if (data.result === 'success' && data.slack_url) {
+            window.open(data.slack_url, '_blank')
+        } else {
+            alert(data.message || '사용자를 찾을 수 없습니다.')
+        }
+    } catch (error) {
+        alert('서버 연결에 실패했습니다.')
+    }
 }

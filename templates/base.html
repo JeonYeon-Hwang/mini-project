@@ -11,17 +11,15 @@
     <script src="{{ url_for('static', filename='js/card.js') }}"></script>
 </head>
 
-<body class="bg-gray-100 text-gray-900">
-    <div class="min-h-screen">
-        <div class="max-w-6xl mx-auto px-4 py-5">
+<body class="bg-gray-100 text-gray-900 h-screen overflow-hidden">
+    <div class="h-full flex flex-col">
+        <div class="max-w-6xl mx-auto px-4 pb-5 w-full flex-1 flex flex-col min-h-0">
             <!--상단 바.!-->
-            <header class="sticky top-0 z-40 -mx-4 px-4 py-5 bg-gray-100/80 backdrop-blur border-b border-gray-200">
+            <header class="shrink-0 z-40 -mx-4 px-4 py-5 bg-gray-100/80 backdrop-blur border-b border-gray-200">
                 <div class="max-w-6xl mx-auto px-4 py-3">
                     <div class="flex items-center gap-2">
                         <!--전체-->
-                        <button
-                            type="button"
-                            onclick="location.href='/'"
+                        <button type="button" onclick="location.href='/'"
                             class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
                                 hover:bg-white hover:shadow-sm border border-transparent
                                 {% if not request.args.get('category') %}bg-white border-gray-200 shadow-sm{% endif %}">
@@ -30,81 +28,63 @@
                         <!-- 카테고리 -->
                         <nav id="categoryScroll" class="flex items-center gap-2 sm:gap-3 overflow-x-auto whitespace-nowrap
                             [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ">
-                            <button
-                                type="button"
-                                onclick="location.href='/?category=돈까스·회·일식'"
+                            <button type="button" onclick="location.href='/?category=돈까스·회·일식'"
                                 class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
                                     hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
                                     {% if request.args.get('category') == '돈까스·회·일식' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
                                 돈까스·회·일식
                             </button>
 
-                            <button
-                                type="button"
-                                onclick="location.href='/?category=피자'"
+                            <button type="button" onclick="location.href='/?category=피자'"
                                 class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
                                     hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
                                     {% if request.args.get('category') == '피자' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
                                 피자
                             </button>
 
-                            <button
-                                type="button"
-                                onclick="location.href='/?category=고기·구이'"
+                            <button type="button" onclick="location.href='/?category=고기·구이'"
                                 class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
                                     hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
                                     {% if request.args.get('category') == '고기·구이' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
                                 고기·구이
                             </button>
 
-                            <button
-                                type="button"
-                                onclick="location.href='/?category=양식'"
+                            <button type="button" onclick="location.href='/?category=양식'"
                                 class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
                                     hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
                                     {% if request.args.get('category') == '양식' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
                                 양식
                             </button>
 
-                            <button
-                                type="button"
-                                onclick="location.href='/?category=치킨'"
+                            <button type="button" onclick="location.href='/?category=치킨'"
                                 class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
                                     hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
                                     {% if request.args.get('category') == '치킨' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
                                 치킨
                             </button>
 
-                            <button
-                                type="button"
-                                onclick="location.href='/?category=중식'"
+                            <button type="button" onclick="location.href='/?category=중식'"
                                 class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
                                     hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
                                     {% if request.args.get('category') == '중식' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
                                 중식
                             </button>
 
-                            <button
-                                type="button"
-                                onclick="location.href='/?category=패스트푸드'"
+                            <button type="button" onclick="location.href='/?category=패스트푸드'"
                                 class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
                                     hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
                                     {% if request.args.get('category') == '패스트푸드' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
                                 패스트푸드
                             </button>
 
-                            <button
-                                type="button"
-                                onclick="location.href='/?category=분식'"
+                            <button type="button" onclick="location.href='/?category=분식'"
                                 class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
                                     hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
                                     {% if request.args.get('category') == '분식' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
                                 분식
                             </button>
 
-                            <button
-                                type="button"
-                                onclick="location.href='/?category=도시락'"
+                            <button type="button" onclick="location.href='/?category=도시락'"
                                 class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
                                     hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
                                     {% if request.args.get('category') == '도시락' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
@@ -115,13 +95,13 @@
                         <div class="flex items-center justify-end">
                             {% if user %}
                             <div class="flex items-center gap-3">
-                                <span class="title px-5 py-4 w-48 break-words text-2xl text-center font-bold text-grey-900 bg-grey-500 rounded-full">
+                                <span
+                                    class="title px-5 py-4 w-48 break-words text-2xl text-center font-bold text-grey-900 bg-grey-500 rounded-full">
                                     {{ user.nickname }} 님
                                 </span>
 
                                 <form method="post" action="{{ url_for('logout') }}">
-                                    <button
-                                        type="submit"
+                                    <button type="submit"
                                         class="whitespace-nowrap px-4 py-3 text-xl font-semibold text-white bg-gray-800 rounded-lg hover:bg-gray-700 transition">
                                         로그아웃
                                     </button>
@@ -129,20 +109,18 @@
 
                                 {% else %}
 
-                                <button
-                                    type="button"
-                                    id="openLoginBtn"
+                                <button type="button" id="openLoginBtn"
                                     onclick="document.getElementById('loginModal').showModal()"
                                     class="whitespace-nowrap whitespace-nowrappx-4 px-4 py-3 text-xl font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-800">
                                     로그인
                                 </button>
 
-                            {% endif %}
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
-                </div>
             </header>
-            
+
 
             <!--모달(로그인)-->
             <dialog id="loginModal" class="p-0">
