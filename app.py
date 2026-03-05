@@ -36,7 +36,7 @@ from contents import FOOD_IMAGE_MAP
 
 
 # 서버에서 최초로 가져올 수 있는 카드 수
-MINIMUM_CARD_LIMIT = 90
+MINIMUM_CARD_LIMIT = 9
 
 # 기본 화면 api
 @app.route('/')
@@ -135,7 +135,6 @@ def identification():
 
 
 #카드를 등록하는 api
-
 @app.route('/food/card/create', methods=['POST'])
 def create_card():
    token_receive = request.cookies.get('mytoken')
@@ -253,6 +252,8 @@ def create_comments():
    db.comments.insert_one(comment)
    return jsonify({'result': 'success', 'message': '댓글이 등록됐습니다!'})
 
+
+
 #^^특정 카드에 가입하는 api, 이미 가입 되었을 시 => 실패 메시지 발송
 @app.route('/food/join', methods=['POST'])
 def join_club():
@@ -309,34 +310,32 @@ def exit_club():
 
 
 
-@app.route('/food/show_more/')
-def show_more():
-   cursor_id = request.args.get('cursor')
-   snapshot_time = int(request.args.get('as_of'))
+@app.route('/food/show_more/<int:page_num>')
+def show_more(page_num):
+   page = int(request.args.get('page', 1))
+   limit = 9
+   skip_value = (page_num - 1) * limit
    
-   query = {'card_created_date' : { '$lte' : snapshot_time }}
-   last_card = db.cards.find_one({'_id': ObjectId(cursor_id)})
-   last_due = last_card['card_duedate']
-
-   query['$or'] = [
-                {'card_duedate': {'$gt': last_due}},
-                {'card_duedate': last_due, '_id': {'$gt': ObjectId(cursor_id)}}
-            ]
+   cards = list(db.cards.find({})
+                  .sort('card_created_date', -1)
+                  .skip(skip_value)
+                  .limit(limit))
    
-   cards = list(db.cards.find(query).sort('card_duedate', 1).limit(MINIMUM_CARD_LIMIT))
-   cards.sort(key=lambda x: x.get('is_alive', False), reverse=True)
+   for card in cards:
+         card['_id'] = str(card['_id'])
+         if card.get('card_duedate'):
+               card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
 
-   next_cursor = str(cards[-1]['_id']) if cards else None
-   has_more = len(cards) == MINIMUM_CARD_LIMIT
-   html_snippet = render_template("index.html", cards=cards)
+   has_more = len(cards) == limit
+   html_snippet = render_template("_cards.html", cards=cards)
 
    return jsonify({
         "result": "success", 
         "html": html_snippet, 
-        "next_cursor": next_cursor, 
-        "has_more": has_more
+        "next_cursor": page + 1 if has_more else None, 
+        "has_more": has_more,
+        "cards" : cards
    })
-   # return jsonify({'result': 'success', 'message': '아직 준비 중'})
 
 
 
