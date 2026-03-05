@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request, make_response, redirect
+from flask import Flask, render_template, jsonify, request, make_response, redirect, url_for
 
 #라우터 임포트
 from sockets.socket_message import socketio
@@ -38,6 +38,20 @@ from contents import FOOD_IMAGE_MAP
 # 서버에서 최초로 가져올 수 있는 카드 수
 MINIMUM_CARD_LIMIT = 15
 
+def get_current_user():
+   token = request.cookies.get("access_token")
+   if not token:
+      return None
+
+   try:
+      payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+      user = db.users.find_one({"id": payload["id"]})
+      return user
+   except jwt.ExpiredSignatureError:
+      return None
+   except jwt.InvalidTokenError:
+      return None
+
 # 기본 화면 api
 @app.route('/')
 def home():
@@ -64,14 +78,14 @@ def home():
       card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
       card['card_type'] = FOOD_IMAGE_MAP.get(card['card_type'])
 
-   return render_template('index.html',
-                           cards = cards ,
+   user = get_current_user()
+   
+   return render_template('index.html', 
+                           cards = cards , 
                            snapshot_time = now,
                            cursor = last_card_id,
-                           user = user
+                           user=user,
                            )
-
-
 
 #추가함 회원가입 api
 @app.route('/food/signin', methods=['POST'])

@@ -13,6 +13,7 @@
 </head>
 
 <body class="bg-gray-100 text-gray-900">
+    <div>{{ user }}</div>
     <div class="min-h-screen">
         <div class="max-w-6xl mx-auto px-4 py-5">
             <!--상단 바.!-->
@@ -112,23 +113,31 @@
                                 도시락
                             </button>
                         </nav>
-                        <div class="flex items-center justify-end gap-2 shrink-0 whitespace-nowrap">
+                        <!--로그인 자리-->
+                        <div class="flex items-center justify-end">
                             {% if user %}
-                                <span class="text-sm font-semibold text-gray-900">{{ user.nickname }}님</span>
-                                <form method="post" action="{{ url_for('logout') }}" style="display: inline;">
-                                    <button type="submit"
-                                        class="px-3 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-sm font-semibold text-gray-900 transition shadow-sm">
+                                <span class="text-sm font-semibold text-gray-700">
+                                    {{ user.id }}님
+                                </span>
+
+                                <form method="post" action="{{ url_for('logout') }}">
+                                    <button
+                                        type="submit"
+                                        class="px-3 py-1.5 text-sm font-medium text-white bg-gray-800 rounded-lg hover:bg-gray-700">
                                         로그아웃
                                     </button>
                                 </form>
-                            {% else %}
+
+                                {% else %}
+
                                 <button
                                     type="button"
                                     id="openLoginBtn"
                                     onclick="document.getElementById('loginModal').showModal()"
-                                    class="px-3 py-2 text-sm font-semibold text-gray-900 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition">
+                                    class="px-4 py-2 text-sm font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-800">
                                     로그인
                                 </button>
+
                             {% endif %}
                         </div>
                     </div>
@@ -250,6 +259,7 @@
                 success: function (response) {
                     if (response['result'] == 'success'){
                         alert('로그인 성공')
+
                         location.reload();
                     }
                     else {
