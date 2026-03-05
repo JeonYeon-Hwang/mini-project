@@ -27,12 +27,32 @@ def article(card_id):
       nickname = None  
    pass
    
-
-
    card = db.cards.find_one({'_id': ObjectId(card_id)})
+
+
+   
    # print( "찾은 카드 " + card)
    card['_id'] = str(card['_id'])
    card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
    card['card_type'] = FOOD_IMAGE_MAP.get(card['card_type'])
-   # return jsonify({'result': 'success' , 'data' : card })
-   return render_template('article.html', card=card, nickname = nickname )
+   
+   user = get_current_user()
+   
+   return render_template('article.html', 
+                           card = card, 
+                           user=user,
+                           )
+
+def get_current_user():
+   token = request.cookies.get("access_token")
+   if not token:
+      return None
+
+   try:
+      payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+      user = db.users.find_one({"id": payload["id"]})
+      return user
+   except jwt.ExpiredSignatureError:
+      return None
+   except jwt.InvalidTokenError:
+      return None
