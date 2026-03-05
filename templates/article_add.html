@@ -1,0 +1,141 @@
+<dialog id="articleAddModal" class="p-0 rounded-3xl shadow-2xl">
+    <form method="dialog" class="p-0" id="articleForm">
+        <div class="w-[min(92vw,500px)] bg-white p-6">
+            <div class="mb-1 flex justify-end">
+                <button type="button" onclick="document.getElementById('articleAddModal').close()"
+                    class="w-12 h-12 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 active:bg-gray-200 rounded-xl transition cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <input type="hidden" id="card_id_edit" name="card_id" value="">
+
+            <div class="flex flex-col gap-4">
+                <div>
+                    <label class="mb-1.5 block text-sm font-bold text-gray-500">제목</label>
+                    <input type="text" id="card_title_input" name="card_title_give"
+                        class="w-full rounded-2xl bg-gray-50 border-2 border-transparent px-4 py-4 text-lg font-bold text-gray-800 outline-none focus:bg-white focus:border-blue-500 focus:ring-8 focus:ring-blue-50 transition-all placeholder-gray-300"
+                        placeholder="모임 제목" required />
+                </div>
+
+                <div>
+                    <label class="mb-1.5 block text-sm font-bold text-gray-500">마감 시간</label>
+                    <div class="relative group">
+                        <input type="datetime-local" id="card_duedate_input" name="card_duedate_give"
+                            class="w-full rounded-2xl bg-gray-50 border-2 border-transparent px-4 py-4 text-lg font-bold text-gray-800 outline-none focus:bg-white focus:border-blue-500 focus:ring-8 focus:ring-blue-50 transition-all cursor-pointer appearance-none"
+                            required />
+                        <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-blue-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="mb-1.5 block text-sm font-bold text-gray-500">메뉴</label>
+                    <div class="relative">
+                        <select id="card_type_input" name="card_type_give"
+                            class="appearance-none w-full rounded-2xl bg-gray-50 border-2 border-transparent px-4 py-4 text-lg font-bold text-gray-800 outline-none focus:bg-white focus:border-blue-500 focus:ring-8 focus:ring-blue-50 transition-all cursor-pointer"
+                            required>
+                            <option value="족발·보쌈">족발·보쌈</option>
+                            <option value="찜·탕·찌개">찜·탕·찌개</option>
+                            <option value="돈까스·회·일식">돈까스·회·일식</option>
+                            <option value="피자">피자</option>
+                            <option value="고기·구이">고기·구이</option>
+                            <option value="양식">양식</option>
+                            <option value="치킨">치킨</option>
+                            <option value="중식">중식</option>
+                            <option value="패스트푸드">패스트푸드</option>
+                            <option value="분식">분식</option>
+                            <option value="도시락">도시락</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-400" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="mb-1.5 block text-sm font-bold text-gray-500">배달앱 링크 (URL)</label>
+                    <input type="url" id="card_url_input" name="card_url_give"
+                        class="w-full rounded-2xl bg-gray-50 border-2 border-transparent px-4 py-4 text-lg font-bold text-gray-800 outline-none focus:bg-white focus:border-blue-500 focus:ring-8 focus:ring-blue-50 transition-all placeholder-gray-300"
+                        placeholder="https://..." />
+                </div>
+
+                <div>
+                    <label class="mb-1.5 block text-sm font-bold text-gray-500">금액 (원)</label>
+                    <div class="relative">
+                        <input type="number" id="card_price_input" name="card_price_give"
+                            class="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none w-full rounded-2xl bg-gray-50 border-2 border-transparent px-4 py-4 pr-12 text-lg font-bold text-gray-800 outline-none focus:bg-white focus:border-blue-500 focus:ring-8 focus:ring-blue-50 transition-all placeholder-gray-300"
+                            placeholder="0" required />
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-5">
+                            <span class="text-gray-400 font-bold">원</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="mb-1.5 block text-sm font-bold text-gray-500">내용</label>
+                    <textarea id="card_content_input" name="card_content_give" rows="2"
+                        class="w-full rounded-2xl bg-gray-50 border-2 border-transparent px-4 py-4 text-lg font-bold text-gray-800 outline-none focus:bg-white focus:border-blue-500 focus:ring-8 focus:ring-blue-50 transition-all resize-none placeholder-gray-300"
+                        placeholder="내용을 적어주세요" required></textarea>
+                </div>
+            </div>
+
+            <button type="button" id="articleSubmitBtn" onclick="submitArticle()"
+                class="mt-6 w-full rounded-xl bg-blue-500 py-3.5 text-xl font-bold text-white shadow-[0_4px_14px_0_rgba(59,130,246,0.39)] hover:bg-blue-600 hover:shadow-[0_6px_20px_rgba(59,130,246,0.23)] active:bg-blue-700 transition-all cursor-pointer">
+                생성하기
+            </button>
+        </div>
+    </form>
+</dialog>
+
+<script>
+    function openAddModal() {
+        document.getElementById('articleSubmitBtn').textContent = '생성하기';
+        document.getElementById('card_id_edit').value = '';
+        document.getElementById('articleForm').reset();
+        document.getElementById('articleAddModal').showModal();
+    }
+
+    function openEditModal(cardData) {
+        document.getElementById('articleSubmitBtn').textContent = '수정하기';
+        document.getElementById('card_id_edit').value = cardData._id || '';
+        document.getElementById('card_title_input').value = cardData.card_title || '';
+
+        if (cardData.card_duedate) {
+            const formattedDate = cardData.card_duedate.replace(' ', 'T');
+            document.getElementById('card_duedate_input').value = formattedDate;
+        }
+
+
+        document.getElementById('card_url_input').value = cardData.card_url || '';
+        document.getElementById('card_price_input').value = cardData.card_price || '';
+        document.getElementById('card_content_input').value = cardData.card_text || cardData.card_content || '';
+        document.getElementById('articleAddModal').showModal();
+    }
+
+    async function submitArticle() {
+
+        const isEdit = document.getElementById('card_id_edit').value !== '';
+        const formData = new FormData(document.getElementById('articleForm'));
+
+        if (isEdit) {
+            alert('수정');
+            return;
+        }
+        alert('생성');
+    }
+
+</script>
