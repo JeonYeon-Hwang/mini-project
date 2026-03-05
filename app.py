@@ -1,4 +1,5 @@
 from flask import Flask, render_template, jsonify, request, make_response
+app = Flask(__name__)
 
 #소켓 임포트
 from sockets.socket_message import socketio 
@@ -92,10 +93,12 @@ def login():
       return jsonify({'result': 'fail', 'message': '아이디 또는 비밀번호가 틀렸습니다'})
 
 
+
 #^^토큰 검증 확인
 @app.route('/food/identification', methods=['POST'])
 def identification():
     token_receive = request.form['token_give']
+    print("토큰 검증 실행")
     
     try:
         # 토큰 해독
@@ -111,6 +114,8 @@ def identification():
         # 토큰 위조됨
         return jsonify({'result': 'fail', 'message': '유효하지 않은 토큰입니다'})
 
+
+
 #카드를 등록하는 api
 @app.route('/food/card/create', methods=['POST'])
 def create_card():
@@ -121,6 +126,7 @@ def create_card():
    card_duedate_receive = request.form['card_duedate_give']
    card_url_receive = request.form['card_url_give']
    card_price_receive = request.form['card_price_give']
+   card_type_receive = request.form['card_type_give']
 
    now = int(time.time())
    clean_date = card_duedate_receive.replace('T', ' ')
@@ -135,6 +141,7 @@ def create_card():
       'card_members' : [ ],
       'card_url' : card_url_receive,
       'card_price' : card_price_receive,
+      "card_type" : card_type_receive,
       'is_alive' : True
    }
 
