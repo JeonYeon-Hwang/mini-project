@@ -29,49 +29,50 @@ def home():
 #추가함 회원가입 api
 @app.route('/food/signin', methods=['POST'])
 def signin():
-    id_receive = request.form['id_give']
-    pw_receive = request.form['pw_give']
-    nickname_receive = request.form['nickname_give']
-    slack_url_receive = request.form['slack_url_give']
+   print("회원가입 실행")
+   id_receive = request.form['id_give']
+   pw_receive = request.form['pw_give']
+   nickname_receive = request.form['nickname_give']
+   slack_url_receive = request.form['slack_url_give']
 
-    pw_hash = hashlib.sha256(pw_receive.encode('utf-8')).hexdigest()
+   pw_hash = hashlib.sha256(pw_receive.encode('utf-8')).hexdigest()
 
-    existing_user = db.users.find_one({'id': id_receive})
-    if existing_user:
-        return jsonify({'result': 'fail', 'message': '이미 존재하는 아이디입니다'})
+   existing_user = db.users.find_one({'id': id_receive})
+   if existing_user:
+      return jsonify({'result': 'fail', 'message': '이미 존재하는 아이디입니다'})
 
-    user = {
-        'id': id_receive,
-        'pw': pw_hash,
-        'nickname': nickname_receive,
-        'slack_url': slack_url_receive
-    }
-    db.users.insert_one(user)
-    return jsonify({'result': 'success'})
+   user = {
+      'id': id_receive,
+      'pw': pw_hash,
+      'nickname': nickname_receive,
+      'slack_url': slack_url_receive
+   }
+   db.users.insert_one(user)
+   return jsonify({'result': 'success'})
 
 
 
 #추가함 로그인 api
 @app.route('/food/login', methods=['POST'])
 def login():
-    id_receive = request.form['id_give']
-    pw_receive = request.form['pw_give']
+   id_receive = request.form['id_give']
+   pw_receive = request.form['pw_give']
 
-    pw_hash = hashlib.sha256(pw_receive.encode('utf-8')).hexdigest()
-    user = db.users.find_one({'id': id_receive, 'pw': pw_hash})
+   pw_hash = hashlib.sha256(pw_receive.encode('utf-8')).hexdigest()
+   user = db.users.find_one({'id': id_receive, 'pw': pw_hash})
 
-    if user:
-        token = jwt.encode(
-            {
-                'id': id_receive,
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=2)
-            },
-            SECRET_KEY,
-            algorithm='HS256'
-        )
-        return jsonify({'result': 'success', 'token': token})
-    else:
-        return jsonify({'result': 'fail', 'message': '아이디 또는 비밀번호가 틀렸습니다'})
+   if user:
+      token = jwt.encode(
+         {
+               'id': id_receive,
+               'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=2)
+         },
+         SECRET_KEY,
+         algorithm='HS256'
+      )
+      return jsonify({'result': 'success', 'token': token})
+   else:
+      return jsonify({'result': 'fail', 'message': '아이디 또는 비밀번호가 틀렸습니다'})
 
 
 
@@ -115,18 +116,23 @@ def show_cards():
          card['_id'] = str(card['_id'])
          card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
 
-   return jsonify({'result': 'success', 'cards': all_cards})
-
    # return jsonify({'result' : 'success', 'cards' : all_cards})
-   # return render_template('index.html', cards = all_cards)
+   return render_template('index.html', cards = all_cards)
 
 
 
 #특정 카드의 댓글을 보여주는 api
 @app.route('/food/<string:card_id>/comments', methods=['GET'])
 def show_card_comments(card_id):
-   query =  {'_id': ObjectId(card_id)}
+   query =  {'card_id': card_id}
    dedicated_comments = list(db.comments.find(query).sort('comment_sent_time', 1))
+   
+   for comments in dedicated_comments:
+      if '_id' in comments:
+         comments['_id'] = str(comments['_id'])
+         comments['comment_sent_time'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(comments['comment_sent_time']))
+
+   # return jsonify({'result' : dedicated_comments})
    return render_template('index.html', comments = dedicated_comments)
 
 
@@ -139,8 +145,8 @@ def create_comments():
    comment_receive = request.form['comment_give']
 
    now = int(time.time())
-   # user_id = db.users.get_user_id()
-   nickname = db.users.find_one({'_id' : "user_id-임시"}).get('nick_name')
+   user_data = db.users.find_one({'id': user_id_receive}, {'_id': False, 'pw': False})
+   nickname = user_data.get('nickname')
 
    comment = {
       'card_id' : card_id_receive,
@@ -158,16 +164,18 @@ def create_comments():
 #특정 카드에 가입하는 api, 이미 가입 되었을 시 => 실패 메시지 발송
 @app.route('/food/join', methods=['POST'])
 def join_clud():
-   # user_id-임시 = db.users.get_user_id()
    card_id_receive = request.form['card_id_give']
-   card = db.cards.find_one({ '_id' : card_id_receive })
-   nickname = card.get('nick_name')
+   user_id_receive = request.form['user_id_give']
    
-   if "user_id-임시" in card.get('card_members', []):
+   card = db.cards.find_one({ '_id' : ObjectId(card_id_receive)})
+   user_data = db.users.find_one({'id': user_id_receive}, {'_id': False, 'pw': False})
+   nickname = user_data.get('nickname')
+   
+   if nickname in card.get('card_members', []):
       return jsonify({'result' : 'fail', 'msg' : '이미 가입된 유저입니다.'})
 
    db.cards.update_one(
-      {'_id' : card_id_receive },
+      {'_id' : ObjectId(card_id_receive)},
       {'$push': { 'card_members' : nickname }}
    )
    return jsonify({'result' : 'success', 'msg': '가입이 완료되었습니다!'})
@@ -175,14 +183,16 @@ def join_clud():
 
 
 #특정 카드에서 탈퇴하는 api
+@app.route('/food/exit', methods=['POST'])
 def exit_club():
-   # user_id-임시 = db.users.get_user_id()
    card_id_receive = request.form['card_id_give']
-   card = db.cards.find_one({ '_id' : card_id_receive })
-   nickname = card.get('nick_name')
+   user_id_receive = request.form['user_id_give']
+   
+   user_data = db.users.find_one({'id': user_id_receive}, {'_id': False, 'pw': False})
+   nickname = user_data.get('nickname')
 
-   db.cards.up(
-      {'_id' : card_id_receive },
+   db.cards.update_one(
+      {'_id' : ObjectId(card_id_receive)},
       {'$pull': { 'card_members' : nickname }}
    )
    return jsonify({'result' : 'success', 'msg': '탈퇴가 완료되었습니다!'})
@@ -193,7 +203,7 @@ def exit_club():
 
 
 
-# 스캐줄러 메서드 입니다
+#스캐줄러 메서드 입니다
 def scheduled_job():
    print("스캐줄링 작동")
 
