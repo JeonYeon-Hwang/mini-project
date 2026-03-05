@@ -26,9 +26,9 @@
                         <span>{{ user.name }}</span>
                     </button>
                     <!--드롭다운 메뉴-->
-                    <div id="userMenu" class="hidden absolute right-0 w-44 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+                    <div id="userMenu" class="absolute right-0 w-44 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
                         <form method="post" action="{{ url_for('logout') }}">
-                            <button type="submit" class="w-full px-4 py-3 text-left text-sm hover:bg-gray-50">
+                            <button type="submit" class="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold hover:bg-gray-100 rounded-xl transition">
                                 로그아웃
                             </button>
                         </form>
@@ -142,17 +142,95 @@
             <button onclick="location.href='/?category=고기·구이'">고기·구이</button>
 
             <!--카드 그리드-->
-            <div id="cardGrid" class="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {% for card in cards %}
-                    {% include 'card.html' %}
-                {% endfor %}
+            <div class="max-w-6xl mx-auto px-4 py-4">
+                <section
+                    id="cardsGrid"
+                    class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {% for card in cards %}
+                        <article
+                            class="card-item bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition p-4 relative"
+                            data-status="{{ card.status }}">
+                            
+                            <!--카드 상단-->
+                            <div class="flex justify-between items-start text-sm">
+                                <!-- 남은 시간 -->
+                                <span class="countdown font-mono text-gray-700">
+                                    00:00:00
+                                </span>
+
+                                <!-- 모집 날짜 -->
+                                <span class="text-gray-400 text-xs">
+                                    {{ card.meet_at }}
+                                </span>
+
+                            </div>
+                            
+                            <!--카드 제목-->
+                            <h3 class="mt-2 font-semibold text-gray-900 truncate">
+                                {{ card.title }}
+                            </h3>
+
+
+                            <!--음식 아이콘, 가격-->
+                            <div class="flex items-center gap-1 min-h-[20px]">
+                                <div class="text-xl">
+                                     {% for icon in (card.icons or []) [:3] %}
+                                        <img src="{{ icon }}" class="w-5 h-5 rounded border bg-white">
+                                    {% endfor %}
+                                </div>
+
+                                <div class="font-semibold text-gray-800">
+                                    {{ "{:,}".format(card.price) }}원
+                                </div>
+                            </div>
+
+                            <!--카드 하단-->
+                            <div class="flex items-center justify-between mt-3 text-sm">
+
+                                <!--같이 했던 유저-->
+                                {% if card.has_played_with %}
+                                    <span class="text-green-600 font-medium">
+                                        같이 먹은 사람 있음
+                                    </span>
+                                {% endif %}
+
+                                <!--참가자 수-->
+                                <div class="flex items-center text-gray-500">
+                                    👤 {{ (card.card_members or []) | length }}<!--    max_member     /{{ card.capacity }}-->
+                                </div>
+
+                            </div>
+
+                        </article>
+                    {% endfor %}
+                    <!--{% include "_cards.html" %}-->
+                </section>
+                
+                <!--cursor!-->
+                <input type="hidden" id="nextCursor" value="{{ next_cursor or '' }}">
+                <div id="noMoreCards" class="hidden text-center text-gray-400 py-6">
+                    더 이상 모임이 없습니다!
+                </div>
+                <div id="loadingSpinner" class="hidden flex justify-center py-6">
+                    <div class="w-6 h-6 border-4 border-gray-300 border-t-gray-800 rounded-full animate-spin"></div>
+                </div>
+                <div id="scrollSentinel" class="h-10"></div>
+
+                <!--추가 버튼-->
+                <button
+                    type="button"
+                    class="fixed right-6 bottom-6 w-12 h-12 rounded-full bg-emerald-500 text-white shadow-lg hover:brightness-95 active:scale-95 transition flex items-center justify-center text-2xl"
+                    onclick="document.getElementById('newCardModal').showModal()"
+                    aria-label="새 모임 만들기">+
+                </button>
+                
             </div>
         </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-    //로그인
+        //로그인
         function login2() {
 
             let id = $('#id_login').val();
@@ -174,7 +252,7 @@
                 }
             });
         }
-    //회원가입
+        //회원가입
         function signin2() {
             let id =$('#id_signin').val();
             let pw =$('#pw_signin').val();
@@ -199,6 +277,62 @@
                 }
             });
         }
+        
+        //paegnation
+        const grid = document.getElementById("cardsGrid");  //카드 그리드 div
+        const sentinel = document.getElementById("scrollSentinel"); //감지용 div
+        const nextCursor = document.getElementById("nextCursor"); //다음 cursor!
+
+        const spinner = document.getElementById("loadingSpinner");  //로딩 표시!!
+        const noMore = document.getElementById("noMoreCards");  //끝 표시!!
+
+        let loading = false;
+        let hasMore = true;
+        let snapshotTime = {{ snapshot_time | tojson}};
+
+        nextCursor.value= {{ cursor | tojson}};
+
+        $(document).ready(function(){
+            loadMore();
+        });
+
+        async function loadMore(){
+            //로딩중이다
+            if (loading) return;
+
+            //이제 없다구요ㅜ
+            if (!hasmore) {
+                noMore.classList.remove("hidden");
+                return;
+            }
+
+            const cursor = nextCursor.value;
+
+            //로딩 시작
+            loading = true;
+            spinner.classList.remove("hidden");
+            
+            //새 카드 요청
+            const res = await fetch('/food/cards?&cursor=${cursor}&as_of=${snapshotTime}', {credentials: "include"});
+            const data = await res.json();
+
+            if (data.result === "success" && data.html) {
+                grid.insertAdjacentHTML("beforeend", data.html);
+                nextCursor.value = data.next_cursor || "";
+                hasMore = !!(data.has_more && data.next_cursor);
+            } 
+            else {
+                hasMore = false;
+            }
+
+            loading = false;
+            spinner.classList.add("hidden");
+        }
+        //감지 시작
+        const io = new IntersectionObserver((entries)=>{if(entries[0].isIntersecting) loadMore();}, { rootMargin: "300px" });
+
+        io.observe(sentinel);
+    
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
