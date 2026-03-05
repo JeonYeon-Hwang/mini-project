@@ -18,15 +18,13 @@
             <!--상단 바-->
             <div class="flex items-start justify-between gap-4 shrink-0">
                 {% if user %}
-                <button id="userMenuBtn"
-                    class="inline-flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-100 transition"
-                    type="button">
-                    <span class="text-sm font-semibold">{{ user.name }}</span>
-                </button>
-                <div id="userMenu"
-                    class="hidden absolute right-0 mt-2 w-44 rounded-xl bg-white border border-gray-200 shadow-lg overflow-hidden">
-                    <form method="post" action="{{ url_for('logout') }}">
-                        <button type="submit" class="w-full text-left px-4 py-3 text-sm hover:bg-gray-50">로그아웃</button>
+                <div class="flex items-center gap-3">
+                    <span class="text-sm font-semibold text-gray-900">{{ user.nickname }}님</span>
+                    <form method="post" action="{{ url_for('logout') }}" style="display: inline;">
+                        <button type="submit"
+                            class="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 text-sm font-semibold text-gray-900 transition">
+                            로그아웃
+                        </button>
                     </form>
                 </div>
                 {% else %}
@@ -110,10 +108,13 @@
             const pw = document.querySelector("#loginModal input[name='pw_give']").value;
             if (!id || !pw) { alert("아이디/비밀번호를 입력해주세요!"); return; }
             try {
+                const formData = new FormData();
+                formData.append('id_give', id);
+                formData.append('pw_give', pw);
+
                 const res = await fetch("/food/login", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ id_give: id, pw_give: pw }),
+                    body: formData,
                 });
                 const data = await res.json();
                 if (data.result === "success") { location.reload(); }
@@ -124,22 +125,39 @@
             }
         }
 
-        async function signup() {
-            const id = document.querySelector("#signupModal input[name='id_give']").value
-            const pw = document.querySelector("#signupModal input[name='pw_give']").value
-            const nickname = document.querySelector("#signupModal input[name='nickname_give']").value
-            const slack = document.querySelector("#signupModal input[name='slack_url_give']").value
-            const res = await fetch("/food/signin", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id_give: id, pw_give: pw, nickname_give: nickname, slack_url_give: slack })
-            })
-            const data = await res.json()
-            if (data.result === "success") {
-                alert("회원가입 완료!")
-                document.getElementById("signupModal").close()
-            } else {
-                alert(data.message)
+        async function signin() {
+            const id = document.querySelector("#signinModal input[name='id_give']").value.trim();
+            const pw = document.querySelector("#signinModal input[name='pw_give']").value;
+            const nickname = document.querySelector("#signinModal input[name='nickname_give']").value.trim();
+            const slack = document.querySelector("#signinModal input[name='slack_url_give']").value.trim();
+
+            if (!id || !pw || !nickname || !slack) {
+                alert("모든 필드를 입력해주세요!");
+                return;
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('id_give', id);
+                formData.append('pw_give', pw);
+                formData.append('nickname_give', nickname);
+                formData.append('slack_url_give', slack);
+
+                const res = await fetch("/food/signin", {
+                    method: "POST",
+                    body: formData,
+                });
+                const data = await res.json();
+                if (data.result === "success") {
+                    alert("회원가입 완료!");
+                    document.getElementById("signinModal").close();
+                    document.getElementById("signinModal").querySelectorAll("input").forEach(input => input.value = "");
+                } else {
+                    alert(data.message || "회원가입 실패");
+                }
+            } catch (e) {
+                console.error(e);
+                alert("서버 통신 오류");
             }
         }
 

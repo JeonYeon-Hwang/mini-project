@@ -112,39 +112,21 @@
                                 도시락
                             </button>
                         </nav>
-                        <div class="flex items-center justify-end">
+                        <div class="flex items-center justify-end gap-2 shrink-0 whitespace-nowrap">
                             {% if user %}
-                                <div class="relative">
-                                    <button
-                                        id="userMenuBtn"
-                                        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-900 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition"
-                                        type="button"
-                                        aria-haspopup="menu"
-                                        aria-expanded="false"
-                                        aria-controls="userMenu">
-                                        <span>{{ user.name }}</span>
-                                        <span class="text-xs text-gray-500">▾</span>
+                                <span class="text-sm font-semibold text-gray-900">{{ user.nickname }}님</span>
+                                <form method="post" action="{{ url_for('logout') }}" style="display: inline;">
+                                    <button type="submit"
+                                        class="px-3 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-sm font-semibold text-gray-900 transition shadow-sm">
+                                        로그아웃
                                     </button>
-                                    <div
-                                        id="userMenu"
-                                        class="hidden absolute right-0 w-44 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden"
-                                        role="menu">
-                                        <form method="post" action="{{ url_for('logout') }}">
-                                            <button
-                                                type="submit"
-                                                class="w-full px-4 py-3 text-left text-sm hover:bg-gray-50"
-                                                role="menuitem">
-                                                로그아웃
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
+                                </form>
                             {% else %}
                                 <button
                                     type="button"
                                     id="openLoginBtn"
                                     onclick="document.getElementById('loginModal').showModal()"
-                                    class="shrink-0 whitespace-nowrap flex items-center justify-center px-5 py-3 text-xl font-semibold text-gray-900 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition">     
+                                    class="px-3 py-2 text-sm font-semibold text-gray-900 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition">
                                     로그인
                                 </button>
                             {% endif %}
@@ -253,7 +235,7 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        //로그인
+        // 로그인
         function login2() {
 
             let id = $('#id_login').val();
@@ -268,9 +250,7 @@
                 success: function (response) {
                     if (response['result'] == 'success'){
                         alert('로그인 성공')
-
-                        const modal = document.getElementById("loginModal");
-                        closeModal(modal);
+                        location.reload();
                     }
                     else {
                         alert('로그인 실패!')
@@ -278,6 +258,14 @@
                 }
             });
         }
+
+        // BFCache에서 페이지 복원 시 새로고침 (로그인 상태 반영)
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                // BFCache에서 복원된 경우
+                location.reload();
+            }
+        });
 
         //회원가입
         function signin2() {
@@ -466,6 +454,7 @@
             slider.scrollLeft = scrollLeft - walk;
         });
     </script>
+
 </body>
 
 </html>
