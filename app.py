@@ -39,7 +39,7 @@ MINIMUM_CARD_LIMIT = 30
 def home():
    category = request.args.get('category')
    query = {'card_type': category} if category else {}
-   cards = list(db.cards.find(query).limit(MINIMUM_CARD_LIMIT))
+   cards = list(db.cards.find(query).sort('card_duedate', 1).limit(MINIMUM_CARD_LIMIT))
    for card in cards:
       card['_id'] = str(card['_id'])
       card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
@@ -132,7 +132,7 @@ def identification():
 
 @app.route('/food/card/create', methods=['POST'])
 def create_card():
-   token_receive = request.form['token_give']
+   token_receive = request.cookies.get('mytoken')
 
    # 1. 토큰으로 user_id 찾기
    try:
@@ -154,6 +154,7 @@ def create_card():
    now = int(time.time())
    clean_date = card_duedate_receive.replace('T', ' ')
    due_timestamp = int(time.mktime(time.strptime(clean_date, '%Y-%m-%d %H:%M')))
+   first_member = db.users.find_one({'id': user_id_receive}).get('nickname')
 
    card = {
       'user_id' : user_id_receive,
@@ -161,7 +162,7 @@ def create_card():
       'card_text' : card_content_receive,
       'card_duedate' : due_timestamp,
       'card_created_date' : now,
-      'card_members' : [ ],
+      'card_members' : [ first_member ],
       'card_url' : card_url_receive,
       'card_price' : card_price_receive,
       "card_type" : card_type_receive,
@@ -176,13 +177,13 @@ def create_card():
 #모든 카드를 보여주는 api
 @app.route('/food/card/show', methods=['GET'])
 def show_cards():
-   all_cards = list(db.cards.find({}).sort('card_created_date', 1))  
+   all_cards = list(db.cards.find({}).sort('card_duedate', 1))  
    
    for card in all_cards:
       if '_id' in card:
          card['_id'] = str(card['_id'])
          card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
-         card['card_type'] = FOOD_IMAGE_MAP.get(card['card_type'], DEFAULT_IMAGE)
+         card['card_type'] = FOOD_IMAGE_MAP.get(card['card_type'])
 
    return jsonify({'result' : 'success', 'cards' : all_cards})
    # return render_template('index.html', cards = all_cards)
@@ -206,10 +207,10 @@ def show_card_comments(card_id):
 
 
 
-#^^댓글을 등록하는 api
+#댓글을 등록하는 api
 @app.route('/food/post/comments', methods=['POST'])
 def create_comments():
-   token_receive = request.form['token_give']
+   token_receive = request.cookies.get('mytoken')
 
    # 1. 토큰으로 user_id 찾기
    try:
@@ -243,7 +244,7 @@ def create_comments():
 @app.route('/food/join', methods=['POST'])
 def join_club():
    card_id_receive = request.form['card_id_give']
-   token_receive = request.form['token_give']
+   token_receive = request.cookies.get('mytoken')
 
    try:
       payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
@@ -312,7 +313,7 @@ def scheduled_job():
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(scheduled_job, 'interval', seconds=3600)
+scheduler.add_job(scheduled_job, 'interval', seconds=180)
 scheduler.start()
 
 
