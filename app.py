@@ -1,9 +1,14 @@
-from flask import Flask, render_template, jsonify, request, make_response
+from flask import Flask, render_template, jsonify, request, make_response, redirect, url_for
 
-#소켓 임포트
+#라우터 임포트
 from sockets.socket_message import socketio
 from routes.message import message_bp
 from routes.user import user_bp
+from routes.cards import food_bp;
+
+#db 임포트
+from db import db
+
 
 app = Flask(__name__)
 
@@ -11,6 +16,7 @@ app = Flask(__name__)
 socketio.init_app(app)
 app.register_blueprint(message_bp)
 app.register_blueprint(user_bp)
+app.register_blueprint(food_bp)
 
 #추가함
 import jwt
@@ -18,29 +24,42 @@ import datetime
 import hashlib
 SECRET_KEY = "welcometothejungle"
 
+
 import time
 import requests
 
 from bs4 import BeautifulSoup
 from bson.objectid import ObjectId
 from apscheduler.schedulers.background import BackgroundScheduler
-from pymongo import MongoClient
 from contents import FOOD_IMAGE_MAP
 
-client = MongoClient('mongodb://korobuster001:blueskY114@52.79.125.68', 27017)
-db = client.dbjungle
 
 
 # 서버에서 최초로 가져올 수 있는 카드 수
-MINIMUM_CARD_LIMIT = 30
+MINIMUM_CARD_LIMIT = 15
+
+def get_current_user():
+   token = request.cookies.get("access_token")
+   if not token:
+      return None
+
+   try:
+      payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+      user = db.users.find_one({"id": payload["id"]})
+      return user
+   except jwt.ExpiredSignatureError:
+      return None
+   except jwt.InvalidTokenError:
+      return None
 
 # 기본 화면 api
 @app.route('/')
 def home():
    category = request.args.get('category')
    query = {'card_type': category} if category else {}
-   cards = list(db.cards.find(query).sort('card_duedate', 1).limit(MINIMUM_CARD_LIMIT))
-   cards.sort(key=lambda x: x.get('is_alive', False), reverse=True)
+   cards = list(db.cards.find(query)
+               .sort([('is_alive', -1), ('card_duedate', 1)]) 
+               .limit(MINIMUM_CARD_LIMIT))
 
    now = int(time.time())
    last_card_id = str(cards[-1].get('_id'))
@@ -49,24 +68,21 @@ def home():
       card['_id'] = str(card['_id'])
       card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
       card['card_type'] = FOOD_IMAGE_MAP.get(card['card_type'])
+
+   user = get_current_user()
+   
    return render_template('index.html', 
-                           cards = cards,
+                           cards = cards , 
                            snapshot_time = now,
-                           cursor = last_card_id 
+                           cursor = last_card_id,
+                           user=user,
                            )
 
-
-
-# 카드 상세 화면 api
-@app.route('/food/<string:card_id>', methods=['GET'])
-def article(card_id):
-    card = db.cards.find_one({'_id': ObjectId(card_id)})
-    card['_id'] = str(card['_id'])
-    card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
-    card['card_type'] = FOOD_IMAGE_MAP.get(card['card_type'])
-    return render_template('article.html', card=card)
-
-
+@app.post("/logout")
+def logout():
+    resp = make_response(redirect(url_for("home")))
+    resp.set_cookie("access_token", "", expires=0)  # 쿠키 삭제
+    return resp
 
 #추가함 회원가입 api
 @app.route('/food/signin', methods=['POST'])
@@ -106,8 +122,8 @@ def login():
    if user:
       token = jwt.encode(
          {
-               'id': id_receive,
-               'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=2)
+            'id': id_receive,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=2)
          },
          SECRET_KEY,
          algorithm='HS256'
@@ -222,8 +238,8 @@ def show_card_comments(card_id):
          comments['_id'] = str(comments['_id'])
          comments['comment_sent_time'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(comments['comment_sent_time']))
 
-   # return jsonify({'result' : dedicated_comments})
-   return render_template('index.html', comments = dedicated_comments)
+   return jsonify({'result' : dedicated_comments})
+   # return render_template('index.html', comments = dedicated_comments)
 
 
 
@@ -259,6 +275,8 @@ def create_comments():
 
    db.comments.insert_one(comment)
    return jsonify({'result': 'success', 'message': '댓글이 등록됐습니다!'})
+
+
 
 #^^특정 카드에 가입하는 api, 이미 가입 되었을 시 => 실패 메시지 발송
 @app.route('/food/join', methods=['POST'])
@@ -316,34 +334,30 @@ def exit_club():
 
 
 
-@app.route('/food/show_more/')
-def show_more():
-   cursor_id = request.args.get('cursor')
-   snapshot_time = int(request.args.get('as_of'))
+@app.route('/food/show_more/<int:page_num>')
+def show_more(page_num):
+   limit = 9
+   skip_value = (page_num - 1) * limit
    
-   query = {'card_created_date' : { '$lte' : snapshot_time }}
-   last_card = db.cards.find_one({'_id': ObjectId(cursor_id)})
-   last_due = last_card['card_duedate']
-
-   query['$or'] = [
-                {'card_duedate': {'$gt': last_due}},
-                {'card_duedate': last_due, '_id': {'$gt': ObjectId(cursor_id)}}
-            ]
+   cards = list(db.cards.find({})
+               .sort([('is_alive', -1), ('card_duedate', 1)]) 
+               .skip(skip_value)   
+               .limit(limit))
    
-   cards = list(db.cards.find(query).sort('card_duedate', 1).limit(MINIMUM_CARD_LIMIT))
-   cards.sort(key=lambda x: x.get('is_alive', False), reverse=True)
+   for card in cards:
+      card['_id'] = str(card['_id'])
+      if card.get('card_duedate'):
+         card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
+      if card.get('card_type'):
+         card['card_type'] = FOOD_IMAGE_MAP.get(card['card_type'])
 
-   next_cursor = str(cards[-1]['_id']) if cards else None
-   has_more = len(cards) == MINIMUM_CARD_LIMIT
-   html_snippet = render_template("index.html", cards=cards)
+   has_more = len(cards) == limit
 
    return jsonify({
-        "result": "success", 
-        "html": html_snippet, 
-        "next_cursor": next_cursor, 
-        "has_more": has_more
+      "result": "success", 
+      "cards": cards, 
+      "has_more": has_more
    })
-   # return jsonify({'result': 'success', 'message': '아직 준비 중'})
 
 
 
