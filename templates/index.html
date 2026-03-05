@@ -6,13 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
     <title>미니프로젝트 | 뭐먹지</title>
-    
-    <!--Tailwind-->
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <style type="text/css">
-    
     </style>
+    <script src="{{ url_for('static', filename='js/card.js') }}"></script>
 </head>
 
 <body class="bg-gray-100 text-gray-900">
@@ -138,9 +135,11 @@
                 </form>
             </dialog>
 
-            <!--마감 표시 토글-->
 
-            <!--정렬 설정-->
+            <button onclick="location.href='/'">전체</button>
+            <button onclick="location.href='/?category=돈까스·회·일식'">돈까스·회·일식</button>
+            <button onclick="location.href='/?category=피자'">피자</button>
+            <button onclick="location.href='/?category=고기·구이'">고기·구이</button>
 
             <!--카드 그리드-->
             <div class="max-w-6xl mx-auto px-4 py-4">
@@ -228,6 +227,7 @@
             </div>
         </div>
     </div>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         //로그인
@@ -333,6 +333,11 @@
 
         io.observe(sentinel);
     
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            startCountdowns()
+        })
     </script>
 </body>
 
