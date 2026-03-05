@@ -36,15 +36,16 @@ from contents import FOOD_IMAGE_MAP
 
 
 # 서버에서 최초로 가져올 수 있는 카드 수
-MINIMUM_CARD_LIMIT = 9
+MINIMUM_CARD_LIMIT = 15
 
 # 기본 화면 api
 @app.route('/')
 def home():
    category = request.args.get('category')
    query = {'card_type': category} if category else {}
-   cards = list(db.cards.find(query).sort('card_duedate', 1).limit(MINIMUM_CARD_LIMIT))
-   cards.sort(key=lambda x: x.get('is_alive', False), reverse=True)
+   cards = list(db.cards.find(query)
+               .sort([('is_alive', -1), ('card_duedate', 1)]) 
+               .limit(MINIMUM_CARD_LIMIT))
 
    now = int(time.time())
    last_card_id = str(cards[-1].get('_id'))
@@ -53,6 +54,7 @@ def home():
       card['_id'] = str(card['_id'])
       card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
       card['card_type'] = FOOD_IMAGE_MAP.get(card['card_type'])
+   
    return render_template('index.html', 
                            cards = cards , 
                            snapshot_time = now,
@@ -312,29 +314,27 @@ def exit_club():
 
 @app.route('/food/show_more/<int:page_num>')
 def show_more(page_num):
-   page = int(request.args.get('page', 1))
    limit = 9
    skip_value = (page_num - 1) * limit
    
    cards = list(db.cards.find({})
-                  .sort('card_created_date', -1)
-                  .skip(skip_value)
-                  .limit(limit))
+               .sort([('is_alive', -1), ('card_duedate', 1)]) 
+               .skip(skip_value)   
+               .limit(limit))
    
    for card in cards:
-         card['_id'] = str(card['_id'])
-         if card.get('card_duedate'):
-               card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
+      card['_id'] = str(card['_id'])
+      if card.get('card_duedate'):
+         card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
+      if card.get('card_type'):
+         card['card_type'] = FOOD_IMAGE_MAP.get(card['card_type'])
 
    has_more = len(cards) == limit
-   html_snippet = render_template("_cards.html", cards=cards)
 
    return jsonify({
-        "result": "success", 
-        "html": html_snippet, 
-        "next_cursor": page + 1 if has_more else None, 
-        "has_more": has_more,
-        "cards" : cards
+      "result": "success", 
+      "cards": cards, 
+      "has_more": has_more
    })
 
 
