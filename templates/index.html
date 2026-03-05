@@ -13,6 +13,7 @@
 </head>
 
 <body class="bg-gray-100 text-gray-900">
+    <div>{{ user }}</div>
     <div class="min-h-screen">
         <div class="max-w-6xl mx-auto px-4 py-5">
             <!--상단 바-->
@@ -112,41 +113,31 @@
                                 도시락
                             </button>
                         </nav>
+                        <!--로그인 자리-->
                         <div class="flex items-center justify-end">
                             {% if user %}
-                                <div class="relative">
+                                <span class="text-sm font-semibold text-gray-700">
+                                    {{ user.id }}님
+                                </span>
+
+                                <form method="post" action="{{ url_for('logout') }}">
                                     <button
-                                        id="userMenuBtn"
-                                        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-900 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition"
-                                        type="button"
-                                        aria-haspopup="menu"
-                                        aria-expanded="false"
-                                        aria-controls="userMenu">
-                                        <span>{{ user.name }}</span>
-                                        <span class="text-xs text-gray-500">▾</span>
+                                        type="submit"
+                                        class="px-3 py-1.5 text-sm font-medium text-white bg-gray-800 rounded-lg hover:bg-gray-700">
+                                        로그아웃
                                     </button>
-                                    <div
-                                        id="userMenu"
-                                        class="hidden absolute right-0 w-44 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden"
-                                        role="menu">
-                                        <form method="post" action="{{ url_for('logout') }}">
-                                            <button
-                                                type="submit"
-                                                class="w-full px-4 py-3 text-left text-sm hover:bg-gray-50"
-                                                role="menuitem">
-                                                로그아웃
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            {% else %}
+                                </form>
+
+                                {% else %}
+
                                 <button
                                     type="button"
                                     id="openLoginBtn"
                                     onclick="document.getElementById('loginModal').showModal()"
-                                    class="shrink-0 whitespace-nowrap flex items-center justify-center px-5 py-3 text-xl font-semibold text-gray-900 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition">     
+                                    class="px-4 py-2 text-sm font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-800">
                                     로그인
                                 </button>
+
                             {% endif %}
                         </div>
                     </div>
@@ -269,8 +260,7 @@
                     if (response['result'] == 'success'){
                         alert('로그인 성공')
 
-                        const modal = document.getElementById("loginModal");
-                        closeModal(modal);
+                        location.reload();
                     }
                     else {
                         alert('로그인 실패!')
