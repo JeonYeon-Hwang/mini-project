@@ -68,7 +68,8 @@
                             전체
                         </button>
                         <!-- 카테고리 -->
-                        <nav class="flex items-center gap-2 sm:gap-3 overflow-x-auto">
+                        <nav id="categoryScroll" class="flex items-center gap-2 sm:gap-3 overflow-x-auto whitespace-nowrap
+                            [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ">
                             <button
                                 type="button"
                                 onclick="location.href='/?category=돈까스·회·일식'"
@@ -389,6 +390,39 @@
         document.addEventListener('DOMContentLoaded', () => {
             startCountdowns()
         })
+    </script>
+    <!--카테고리 마우스 이동-->
+    <script>
+        const slider = document.getElementById("categoryScroll");
+
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        slider.addEventListener("mousedown", (e) => {
+            isDown = true;
+            slider.classList.add("cursor-grabbing");
+            startX = e.pageX - slider.offsetLeft;
+            scrollLeft = slider.scrollLeft;
+        });
+
+        slider.addEventListener("mouseleave", () => {
+            isDown = false;
+            slider.classList.remove("cursor-grabbing");
+        });
+
+        slider.addEventListener("mouseup", () => {
+            isDown = false;
+            slider.classList.remove("cursor-grabbing");
+        });
+
+        slider.addEventListener("mousemove", (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - slider.offsetLeft;
+            const walk = (x - startX) * 1.5;
+            slider.scrollLeft = scrollLeft - walk;
+        });
     </script>
 </body>
 
