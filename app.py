@@ -1,5 +1,13 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, make_response
 app = Flask(__name__)
+
+#소켓 임포트
+from sockets.socket_message import socketio 
+from routes.socket_message import message_bp
+
+#소켓 초기화
+socketio.init_app(app)  
+app.register_blueprint(message_bp)
 
 #추가함
 import jwt
@@ -14,6 +22,8 @@ from bs4 import BeautifulSoup
 from bson.objectid import ObjectId
 from apscheduler.schedulers.background import BackgroundScheduler
 from pymongo import MongoClient
+
+from contents import FOOD_IMAGE_MAP
 client = MongoClient('mongodb://korobuster001:blueskY114@52.79.125.68', 27017)
 db = client.dbjungle
 
@@ -21,8 +31,17 @@ db = client.dbjungle
 
 # 기본 화면 api
 @app.route('/')
-def home():
-   return render_template('index.html')
+def main():
+   # 사실 여기서는 모든 카드를 한꺼번에 보여주지만, 이후에는 페이징 기법을 추가할 예정
+   all_cards = list(db.cards.find({}).sort('card_created_date', 1))  
+   
+   for card in all_cards:
+      if '_id' in card:
+         card['_id'] = str(card['_id'])
+         card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
+
+   # return jsonify({'result' : 'success', 'cards' : all_cards})
+   return render_template('index.html', cards = all_cards)
 
 
 
@@ -70,12 +89,15 @@ def login():
          SECRET_KEY,
          algorithm='HS256'
       )
-      return jsonify({'result': 'success', 'token': token})
+      response = make_response(jsonify({'result': 'success' , 'token' : token }))
+      response.set_cookie('access_token', token, httponly=True, samesite='Lax')
+      return response
    else:
       return jsonify({'result': 'fail', 'message': '아이디 또는 비밀번호가 틀렸습니다'})
 
 
-#^^토큰 검증 확인
+
+#토큰 검증 확인
 @app.route('/food/identification', methods=['POST'])
 def identification():
     token_receive = request.form['token_give']
@@ -94,7 +116,10 @@ def identification():
         # 토큰 위조됨
         return jsonify({'result': 'fail', 'message': '유효하지 않은 토큰입니다'})
 
-#^^카드를 등록하는 api
+
+
+#카드를 등록하는 api
+
 @app.route('/food/card/create', methods=['POST'])
 def create_card():
    token_receive = request.form['token_give']
@@ -113,6 +138,8 @@ def create_card():
    # 1. 프론트에서 보낸 문자열 받기 ("2026-03-31T23:59")
    card_duedate_receive = request.form['card_duedate_give']
    card_url_receive = request.form['card_url_give']
+   card_price_receive = request.form['card_price_give']
+   card_type_receive = request.form['card_type_give']
 
    now = int(time.time())
    clean_date = card_duedate_receive.replace('T', ' ')
@@ -126,6 +153,8 @@ def create_card():
       'card_created_date' : now,
       'card_members' : [ ],
       'card_url' : card_url_receive,
+      'card_price' : card_price_receive,
+      "card_type" : card_type_receive,
       'is_alive' : True
    }
 
@@ -143,9 +172,11 @@ def show_cards():
       if '_id' in card:
          card['_id'] = str(card['_id'])
          card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
+         card['card_type'] = FOOD_IMAGE_MAP.get(card['card_type'])
 
    return jsonify({'result' : 'success', 'cards' : all_cards})
-   #return render_template('index.html', cards = all_cards)
+   # return render_template('index.html', cards = all_cards)
+
 
 
 
@@ -271,11 +302,13 @@ def scheduled_job():
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(scheduled_job, 'interval', minutes=10)
+scheduler.add_job(scheduled_job, 'interval', seconds=3600)
 scheduler.start()
 
 
 
 if __name__ == '__main__':
-   app.run('0.0.0.0', port=5001, debug=True)
+   #app.run('0.0.0.0', port=5001, debug=True)
 
+   #소켓 실행
+    socketio.run(app, '0.0.0.0', port=5001, debug=True)
