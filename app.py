@@ -95,6 +95,7 @@ def create_card():
    # 1. 프론트에서 보낸 문자열 받기 ("2026-03-31T23:59")
    card_duedate_receive = request.form['card_duedate_give']
    card_url_receive = request.form['card_url_give']
+   card_price_receive = request.form['card_price_give']
 
    now = int(time.time())
    clean_date = card_duedate_receive.replace('T', ' ')
@@ -108,6 +109,7 @@ def create_card():
       'card_created_date' : now,
       'card_members' : [ ],
       'card_url' : card_url_receive,
+      'card_price' : card_price_receive,
       'is_alive' : True
    }
 
