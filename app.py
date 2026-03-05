@@ -21,8 +21,16 @@ db = client.dbjungle
 
 # 기본 화면 api
 @app.route('/')
-def home():
-   return render_template('index.html')
+def main():
+   all_cards = list(db.cards.find({}).sort('card_created_date', 1))  
+   
+   for card in all_cards:
+      if '_id' in card:
+         card['_id'] = str(card['_id'])
+         card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
+
+   # return jsonify({'result' : 'success', 'cards' : all_cards})
+   return render_template('index.html', cards = all_cards)
 
 
 
@@ -118,8 +126,8 @@ def show_cards():
          card['_id'] = str(card['_id'])
          card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
 
-   # return jsonify({'result' : 'success', 'cards' : all_cards})
-   return render_template('index.html', cards = all_cards)
+   return jsonify({'result' : 'success', 'cards' : all_cards})
+   # return render_template('index.html', cards = all_cards)
 
 
 
@@ -134,8 +142,8 @@ def show_card_comments(card_id):
          comments['_id'] = str(comments['_id'])
          comments['comment_sent_time'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(comments['comment_sent_time']))
 
-   # return jsonify({'result' : dedicated_comments})
-   return render_template('index.html', comments = dedicated_comments)
+   return jsonify({'result' : dedicated_comments})
+   # return render_template('index.html', comments = dedicated_comments)
 
 
 
@@ -218,7 +226,7 @@ def scheduled_job():
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(scheduled_job, 'interval', minutes=10)
+scheduler.add_job(scheduled_job, 'interval', seconds=3600)
 scheduler.start()
 
 
