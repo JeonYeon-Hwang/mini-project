@@ -50,9 +50,10 @@ def home():
       card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
       card['card_type'] = FOOD_IMAGE_MAP.get(card['card_type'])
    return render_template('index.html', 
-                           cards = cards, 
-                           snapshot_time = now,
-                           cursor = last_card_id )
+                           cards = cards 
+                           # snapshot_time = now,
+                           # cursor = last_card_id 
+                           )
 
 
 # 카드 상세 화면 api
@@ -308,6 +309,39 @@ def exit_club():
       {'$pull': {'card_members': nickname}}
    )
    return jsonify({'result': 'success', 'message': '탈퇴가 완료됐습니다!'})
+
+
+
+@app.route('/food/show_more/')
+def show_more():
+   cursor_id = request.args.get('cursor')
+   snapshot_time = int(request.args.get('as_of'))
+   
+   query = {'card_created_date' : { '$lte' : snapshot_time }}
+   last_card = db.cards.find_one({'_id': ObjectId(cursor_id)})
+   last_due = last_card['card_duedate']
+
+   query['$or'] = [
+                {'card_duedate': {'$gt': last_due}},
+                {'card_duedate': last_due, '_id': {'$gt': ObjectId(cursor_id)}}
+            ]
+   
+   cards = list(db.cards.find(query).sort('card_duedate', 1).limit(MINIMUM_CARD_LIMIT))
+   cards.sort(key=lambda x: x.get('is_alive', False), reverse=True)
+
+   next_cursor = str(cards[-1]['_id']) if cards else None
+   has_more = len(cards) == MINIMUM_CARD_LIMIT
+   html_snippet = render_template("index.html", cards=cards)
+
+   return jsonify({
+        "result": "success", 
+        "html": html_snippet, 
+        "next_cursor": next_cursor, 
+        "has_more": has_more
+   })
+
+   return jsonify({'result': 'success', 'message': '아직 준비 중'})
+
 
 
 
