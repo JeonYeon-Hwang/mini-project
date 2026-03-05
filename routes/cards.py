@@ -3,6 +3,8 @@ from bson.objectid import ObjectId
 from db import db
 import time
 
+from contents import FOOD_IMAGE_MAP
+
 food_bp = Blueprint('food', __name__)
 
 
@@ -13,5 +15,6 @@ def article(card_id):
    # print( "찾은 카드 " + card)
    card['_id'] = str(card['_id'])
    card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
-   return jsonify({'result': 'success' , 'data' : card })
-#    return render_template('article.html', card=card)
+   card['card_type'] = FOOD_IMAGE_MAP.get(card['card_type'])
+   # return jsonify({'result': 'success' , 'data' : card })
+   return render_template('article.html', card=card)
