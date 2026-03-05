@@ -1,13 +1,230 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="utf-8" />
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body>
-    <div class="flex h-screen">
-        <div class="w-1/2 border-r"></div>
-        <div class="w-1/2"></div>
+{% extends 'base.html' %}
+{% block title %}뭐먹지{{ card.card_title }}{% endblock %}
+{% block content %}
+<main class="flex-1 flex flex-col min-h-0 pt-4 overflow-hidden">
+  <div class="flex-1 flex gap-4 p-4 bg-blue-100 rounded-2xl overflow-hidden">
+    <div class="w-1/2 flex flex-col bg-white/60 p-6 rounded-xl shadow-sm overflow-y-auto">
+      <div class="relative flex justify-center mb-2">
+        <div class="flex flex-col items-center">
+          <span class="text-6xl font-bold text-gray-500 countdown" data-duedate="{{ card.card_duedate }}"></span>
+          <span class="text-lg font-bold text-gray-400 mt-1">{{ card.card_duedate }}</span>
+        </div>
+        <div class="absolute right-0 top-0 flex gap-2 text-gray-500 font-semibold text-sm sm:text-base">
+          <button type="button" class="p-2 hover:bg-gray-200 rounded-xl transition cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <h2 class="text-xl sm:text-4xl font-bold text-black mt-4 mb-8 line-clamp-2 leading-snug">{{card.card_title}}</h2>
+      <div class="flex items-center justify-end gap-3 mb-4">
+        <img src="{{ card.card_type }}"
+          class="w-12 h-12 rounded-md object-cover cursor-pointer hover:opacity-80 transition"
+          onclick="onMenuClick(event, '{{ card._id }}')" />
+        <span class="font-extrabold text-gray-700 text-3xl">{{ "{:,}".format(card.card_price | default(0) |
+          int)}}원</span>
+        <div class="flex items-center text-gray-400 font-bold text-3xl gap-1 ml-2">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-10 h-10">
+            <path fill-rule="evenodd"
+              d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z"
+              clip-rule="evenodd" />
+          </svg>
+          <span>{{ card.card_members | length }}</span>
+        </div>
+      </div>
+      <div class="mt-2 bg-white rounded-2xl border border-gray-200 shadow-sm p-3 flex gap-2 items-start">
+        <div id="article-members-container"
+          class="flex flex-wrap gap-2 overflow-hidden flex-1 min-w-0 content-start items-start"
+          style="min-height: calc(2 * (2.25rem + 0.5rem)); max-height: calc(2 * (2.25rem + 0.5rem));">
+          {% for member in card.card_members %}
+          <div class="flex items-center bg-black text-white rounded-xl pl-3 pr-1 py-1 shadow-sm member-badge"
+            data-member="{{ member }}">
+            <button type="button" class="font-bold text-base mr-2 hover:text-gray-300 transition"
+              onclick="onMemberClick(event, '{{ member }}')">
+              {{ member }}
+            </button>
+            <button type="button" data-member="{{ member }}"
+              class="w-6 h-6 flex items-center justify-center bg-gray-600 rounded-lg hover:bg-gray-500 transition"
+              onclick="onRemoveMemberClick(event, '{{ member }}')">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="shrink-0 flex flex-col gap-1">
+          <button type="button" id="member-copy-btn" onclick="onMemberCopyClick(event)"
+            class="w-10 h-10 flex items-center justify-center bg-gray-100 hover:bg-gray-200 active:bg-gray-300 rounded-xl transition cursor-pointer"
+            title="멤버 목록 복사">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-500" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+          </button>
+          <button type="button" id="member-expand-btn" onclick="onMemberExpandClick(event)"
+            class="hidden w-10 h-10 flex items-center justify-center bg-gray-100 hover:bg-gray-200 active:bg-gray-300 rounded-xl transition cursor-pointer"
+            title="전체 멤버 보기">
+            <svg id="member-expand-icon" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-500" fill="none"
+              viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="flex-1 mt-3 bg-white rounded-2xl border border-gray-200 shadow-sm p-4 overflow-y-auto min-h-0">
+        <p class="text-gray-700 text-base">{{ card.card_text }}</p>
+      </div>
     </div>
-</body>
-</html>
+    <div class="relative w-1/2 flex flex-col bg-white rounded-2xl shadow-md border border-blue-200 overflow-hidden">
+      <!-- 최상위 플로팅 버튼 바 -->
+      <div class="absolute top-3 left-3 right-3 flex justify-between z-20 pointer-events-none">
+        <button type="button" id="status-toggle-btn" onclick="onStatusToggleClick(event)"
+          class="pointer-events-auto px-6 py-2 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white text-xl font-bold rounded-xl shadow-lg transition cursor-pointer">
+          참여하기
+        </button>
+        <button type="button" onclick="history.back()"
+          class="pointer-events-auto w-14 h-14 flex items-center justify-center bg-white hover:bg-gray-100 active:bg-gray-200 rounded-xl shadow-lg border border-gray-200 transition cursor-pointer">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-gray-600" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+      </div>
+      <div id="chatBox" class="flex-1 overflow-y-auto px-4 pt-16 pb-2 space-y-2"></div>
+      <div class="px-4 py-3 border-t border-gray-200 flex gap-2">
+        <input id="messageInput" type="text"
+          class="flex-1 border border-gray-300 rounded-lg px-4 py-3 text-base outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-300 transition"
+          placeholder="메시지를 입력하세요..." />
+        <button onclick="sendMessage()"
+          class="bg-blue-500 hover:bg-blue-600 text-white text-base font-medium px-5 py-3 rounded-lg transition">
+          전송
+        </button>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+
+
+<script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+<script>
+  // 소켓 체팅 로직
+  const chatBox = document.getElementById('chatBox');
+  const messageInput = document.getElementById('messageInput');
+  const socket = io();
+
+  const myNickname = '{{ my_nickname }}';
+
+  let userId = sessionStorage.getItem('userId');
+  if (!userId) {
+    userId = Math.random().toString(36).substr(2, 9);
+    sessionStorage.setItem('userId', userId);
+  }
+
+  messageInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
+
+  function sendMessage() {
+    const text = messageInput.value.trim();
+    if (!text) return;
+    messageInput.value = '';
+    messageInput.focus();
+    socket.emit('message', { text, userId, nickname: myNickname });
+  }
+
+  function appendMessage(text, sender, nickname = '') {
+    const wrapper = document.createElement('div');
+    wrapper.className = sender === 'me' ? 'flex justify-end' : 'flex flex-col items-start';
+    if (sender === 'other' && nickname) {
+      const nameEl = document.createElement('span');
+      nameEl.className = 'text-xs text-gray-400 mb-1 ml-1';
+      nameEl.textContent = nickname;
+      wrapper.appendChild(nameEl);
+    }
+    const bubble = document.createElement('div');
+    bubble.className = sender === 'me'
+      ? 'bg-blue-500 text-white text-base px-4 py-2 rounded-2xl rounded-br-sm max-w-[75%] break-words'
+      : 'bg-gray-100 text-gray-800 text-base px-4 py-2 rounded-2xl rounded-bl-sm max-w-[75%] break-words';
+    bubble.textContent = text;
+    wrapper.appendChild(bubble);
+    chatBox.appendChild(wrapper);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  fetch('/messages')
+    .then(res => res.json())
+    .then(data => data.messages.forEach(msg => {
+      const sender = msg.userId === userId ? 'me' : 'other';
+      appendMessage(msg.text, sender, sender === 'other' ? msg.nickname : '');
+    }));
+
+  socket.on('message', data => {
+    const sender = data.userId === userId ? 'me' : 'other';
+    appendMessage(data.text, sender, sender === 'other' ? data.nickname : '');
+  });
+
+  function onStatusToggleClick(event) {
+    event.stopPropagation();
+    //상태 변경
+  }
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('article-members-container');
+    const expandBtn = document.getElementById('member-expand-btn');
+    if (container && expandBtn && container.scrollHeight > container.clientHeight + 4) {
+      expandBtn.classList.remove('hidden');
+    }
+  });
+
+  function onMemberExpandClick(event) {
+    event.stopPropagation();
+    const container = document.getElementById('article-members-container');
+    const icon = document.getElementById('member-expand-icon');
+    const isExpanded = container.style.maxHeight === 'none';
+    if (isExpanded) {
+      const twoRowH = 'calc(2 * (2.25rem + 0.5rem))';
+      container.style.maxHeight = twoRowH;
+      container.style.minHeight = twoRowH;
+      icon.querySelector('path').setAttribute('d', 'M19 9l-7 7-7-7');
+      document.getElementById('member-expand-btn').title = '전체 멤버 보기';
+      return
+    }
+    container.style.maxHeight = 'none';
+    container.style.minHeight = 'unset';
+    icon.querySelector('path').setAttribute('d', 'M5 15l7-7 7 7');
+    document.getElementById('member-expand-btn').title = '접기';
+
+  }
+
+  function onMemberCopyClick(event) {
+    event.stopPropagation();
+    const badges = document.querySelectorAll('#article-members-container .member-badge');
+    const names = Array.from(badges).map(el => `@${el.dataset.member}`).join(' ');
+    navigator.clipboard.writeText(names);
+  }
+
+  function onMenuClick(event, cardId) {
+    event.stopPropagation();
+  }
+
+  function onMemberClick(event, memberName) {
+    event.stopPropagation();
+    // 유저 프로필
+  }
+
+  function onRemoveMemberClick(event, memberName) {
+    event.stopPropagation();
+
+
+    //@app.route('/food/exit', methods=['POST']) 
+    document.querySelector(`.member-badge[data-member="${memberName}"]`)?.remove();
+  }
+</script>
+{% endblock %}

@@ -51,7 +51,8 @@ def article(card_id):
     card = db.cards.find_one({'_id': ObjectId(card_id)})
     card['_id'] = str(card['_id'])
     card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
-    return render_template('article.html', card=card)
+    card['card_type'] = FOOD_IMAGE_MAP.get(card['card_type'])
+    return render_template('article.html', card=card, my_nickname='닉네임')
 
 #추가함 회원가입 api
 @app.route('/food/signin', methods=['POST'])
