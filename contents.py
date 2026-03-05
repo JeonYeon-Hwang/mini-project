@@ -11,3 +11,5 @@ FOOD_IMAGE_MAP = {
     "분식": "https://cdn-icons-png.flaticon.com/512/6715/6715326.png",
     "도시락": "https://cdn-icons-png.flaticon.com/512/7472/7472941.png"
 }
+
+DEFAULT_IMAGE = "https://cdn-icons-png.flaticon.com/512/3067/3067788.png"
