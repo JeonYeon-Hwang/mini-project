@@ -1,5 +1,12 @@
 from flask import Flask, render_template, jsonify, request, make_response
-app = Flask(__name__)
+
+#소켓 임포트
+from sockets.socket_message import socketio 
+from routes.socket_message import message_bp
+
+#소켓 초기화
+socketio.init_app(app)  
+app.register_blueprint(message_bp)
 
 #추가함
 import jwt
@@ -224,5 +231,7 @@ scheduler.start()
 
 
 if __name__ == '__main__':
-   app.run('0.0.0.0', port=5001, debug=True)
+   #app.run('0.0.0.0', port=5001, debug=True)
 
+   #소켓 실행
+    socketio.run(app, '0.0.0.0', port=5001, debug=True)
