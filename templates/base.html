@@ -12,31 +12,137 @@
 </head>
 
 <body class="bg-gray-100 text-gray-900">
-    <div class="min-h-screen flex flex-col">
-        <div class="max-w-6xl w-full mx-auto px-4 py-5 flex-1 flex flex-col">
+    <div class="min-h-screen">
+        <div class="max-w-6xl mx-auto px-4 py-5">
+            <!--상단 바.!-->
+            <header class="sticky top-0 z-40 -mx-4 px-4 py-5 bg-gray-100/80 backdrop-blur border-b border-gray-200">
+                <div class="max-w-6xl mx-auto px-4 py-3">
+                    <div class="flex items-center gap-2">
+                        <!--전체-->
+                        <button
+                            type="button"
+                            onclick="location.href='/'"
+                            class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
+                                hover:bg-white hover:shadow-sm border border-transparent
+                                {% if not request.args.get('category') %}bg-white border-gray-200 shadow-sm{% endif %}">
+                            전체
+                        </button>
+                        <!-- 카테고리 -->
+                        <nav id="categoryScroll" class="flex items-center gap-2 sm:gap-3 overflow-x-auto whitespace-nowrap
+                            [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ">
+                            <button
+                                type="button"
+                                onclick="location.href='/?category=돈까스·회·일식'"
+                                class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
+                                    hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
+                                    {% if request.args.get('category') == '돈까스·회·일식' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
+                                돈까스·회·일식
+                            </button>
 
-            <!--상단 바-->
-            <div class="flex items-start justify-between gap-4 shrink-0">
-                {% if user %}
-                <button id="userMenuBtn"
-                    class="inline-flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-100 transition"
-                    type="button">
-                    <span class="text-sm font-semibold">{{ user.name }}</span>
-                </button>
-                <div id="userMenu"
-                    class="hidden absolute right-0 mt-2 w-44 rounded-xl bg-white border border-gray-200 shadow-lg overflow-hidden">
-                    <form method="post" action="{{ url_for('logout') }}">
-                        <button type="submit" class="w-full text-left px-4 py-3 text-sm hover:bg-gray-50">로그아웃</button>
-                    </form>
+                            <button
+                                type="button"
+                                onclick="location.href='/?category=피자'"
+                                class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
+                                    hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
+                                    {% if request.args.get('category') == '피자' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
+                                피자
+                            </button>
+
+                            <button
+                                type="button"
+                                onclick="location.href='/?category=고기·구이'"
+                                class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
+                                    hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
+                                    {% if request.args.get('category') == '고기·구이' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
+                                고기·구이
+                            </button>
+
+                            <button
+                                type="button"
+                                onclick="location.href='/?category=양식'"
+                                class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
+                                    hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
+                                    {% if request.args.get('category') == '양식' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
+                                양식
+                            </button>
+
+                            <button
+                                type="button"
+                                onclick="location.href='/?category=치킨'"
+                                class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
+                                    hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
+                                    {% if request.args.get('category') == '치킨' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
+                                치킨
+                            </button>
+
+                            <button
+                                type="button"
+                                onclick="location.href='/?category=중식'"
+                                class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
+                                    hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
+                                    {% if request.args.get('category') == '중식' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
+                                중식
+                            </button>
+
+                            <button
+                                type="button"
+                                onclick="location.href='/?category=패스트푸드'"
+                                class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
+                                    hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
+                                    {% if request.args.get('category') == '패스트푸드' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
+                                패스트푸드
+                            </button>
+
+                            <button
+                                type="button"
+                                onclick="location.href='/?category=분식'"
+                                class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
+                                    hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
+                                    {% if request.args.get('category') == '분식' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
+                                분식
+                            </button>
+
+                            <button
+                                type="button"
+                                onclick="location.href='/?category=도시락'"
+                                class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
+                                    hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
+                                    {% if request.args.get('category') == '도시락' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
+                                도시락
+                            </button>
+                        </nav>
+                        <!--로그인 자리-->
+                        <div class="flex items-center justify-end">
+                            {% if user %}
+                            <div class="flex items-center gap-3">
+                                <span class="title px-5 py-4 w-48 break-words text-2xl text-center font-bold text-grey-900 bg-grey-500 rounded-full">
+                                    {{ user.nickname }} 님
+                                </span>
+
+                                <form method="post" action="{{ url_for('logout') }}">
+                                    <button
+                                        type="submit"
+                                        class="whitespace-nowrap px-4 py-3 text-xl font-semibold text-white bg-gray-800 rounded-lg hover:bg-gray-700 transition">
+                                        로그아웃
+                                    </button>
+                                </form>
+
+                                {% else %}
+
+                                <button
+                                    type="button"
+                                    id="openLoginBtn"
+                                    onclick="document.getElementById('loginModal').showModal()"
+                                    class="whitespace-nowrap whitespace-nowrappx-4 px-4 py-3 text-xl font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-800">
+                                    로그인
+                                </button>
+
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
-                {% else %}
-                <button id="openLoginBtn"
-                    class="px-4 py-2 rounded-xl bg-gray-900 text-white text-sm font-semibold hover:brightness-95 active:scale-[0.99] transition"
-                    onclick="document.getElementById('loginModal').showModal()" type="button">
-                    로그인
-                </button>
-                {% endif %}
-            </div>
+            </header>
+            
 
             <!--모달(로그인)-->
             <dialog id="loginModal" class="p-0">
@@ -113,10 +219,13 @@
             const pw = document.querySelector("#loginModal input[name='pw_give']").value;
             if (!id || !pw) { alert("아이디/비밀번호를 입력해주세요!"); return; }
             try {
+                const formData = new FormData();
+                formData.append('id_give', id);
+                formData.append('pw_give', pw);
+
                 const res = await fetch("/food/login", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ id_give: id, pw_give: pw }),
+                    body: formData,
                 });
                 const data = await res.json();
                 if (data.result === "success") { location.reload(); }
@@ -127,22 +236,39 @@
             }
         }
 
-        async function signup() {
-            const id = document.querySelector("#signupModal input[name='id_give']").value
-            const pw = document.querySelector("#signupModal input[name='pw_give']").value
-            const nickname = document.querySelector("#signupModal input[name='nickname_give']").value
-            const slack = document.querySelector("#signupModal input[name='slack_url_give']").value
-            const res = await fetch("/food/signin", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id_give: id, pw_give: pw, nickname_give: nickname, slack_url_give: slack })
-            })
-            const data = await res.json()
-            if (data.result === "success") {
-                alert("회원가입 완료!")
-                document.getElementById("signupModal").close()
-            } else {
-                alert(data.message)
+        async function signin() {
+            const id = document.querySelector("#signinModal input[name='id_give']").value.trim();
+            const pw = document.querySelector("#signinModal input[name='pw_give']").value;
+            const nickname = document.querySelector("#signinModal input[name='nickname_give']").value.trim();
+            const slack = document.querySelector("#signinModal input[name='slack_url_give']").value.trim();
+
+            if (!id || !pw || !nickname || !slack) {
+                alert("모든 필드를 입력해주세요!");
+                return;
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('id_give', id);
+                formData.append('pw_give', pw);
+                formData.append('nickname_give', nickname);
+                formData.append('slack_url_give', slack);
+
+                const res = await fetch("/food/signin", {
+                    method: "POST",
+                    body: formData,
+                });
+                const data = await res.json();
+                if (data.result === "success") {
+                    alert("회원가입 완료!");
+                    document.getElementById("signinModal").close();
+                    document.getElementById("signinModal").querySelectorAll("input").forEach(input => input.value = "");
+                } else {
+                    alert(data.message || "회원가입 실패");
+                }
+            } catch (e) {
+                console.error(e);
+                alert("서버 통신 오류");
             }
         }
 
