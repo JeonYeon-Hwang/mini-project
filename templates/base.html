@@ -116,7 +116,7 @@
                             {% if user %}
                             <div class="flex items-center gap-3">
                                 <span class="title px-5 py-4 w-48 break-words text-2xl text-center font-bold text-grey-900 bg-grey-500 rounded-full">
-                                    553dddddddddd333님
+                                    {{ user.nickname }} 님
                                 </span>
 
                                 <form method="post" action="{{ url_for('logout') }}">
