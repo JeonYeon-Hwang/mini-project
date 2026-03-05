@@ -1,8 +1,30 @@
+function createMemberHTML(member, isArticle = false) {
+    if (isArticle) {
+        return `
+            <div class="flex items-center bg-black text-white rounded-xl pl-3 pr-1 py-1 shadow-sm member-badge" data-member="${member}">
+                <button type="button" class="font-bold text-lg mr-2 hover:text-gray-300 transition"
+                    onclick="onMemberClick(event, '${member}')">
+                    ${member}
+                </button>
+                <button type="button" data-member="${member}"
+                    class="w-7 h-7 flex items-center justify-center bg-gray-600 rounded-lg hover:bg-gray-500 transition"
+                    onclick="onRemoveMemberClick(event, '${member}')">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        `;
+    }
+    return `<span onclick="onMemberClick(event, '${member}')" class="text-xl font-medium text-gray-400 cursor-pointer mr-1">@${member}</span>`;
+}
+
 function createCardHTML(card) {
     const diff = new Date(card.card_duedate) - new Date()
     const opacityClass = diff <= 0 ? 'opacity-50 pointer-events-none' : ''
     const membersHTML = (card.card_members || [])
-        .map(m => `<span onclick="onMemberClick(event, '${m}')" class="text-xl font-medium text-gray-400 cursor-pointer">@${m}</span>`)
+        .map(m => createMemberHTML(m, false))
         .join('')
 
     return `
@@ -14,23 +36,26 @@ function createCardHTML(card) {
 
             <h3 class="text-2xl font-semibold text-gray-900 truncate">${card.card_title}</h3>
 
-            <div onclick="onIconClick(event, '${card.card_url}')" class="flex items-center justify-end cursor-pointer">
+            <div class="flex items-center justify-end">
                 <div class="flex items-center gap-1">
-                    <img src="${card.card_type}" class="w-12 h-12 rounded-md object-cover" />
+                    <img onclick="onIconClick(event, '${card.card_url}')" src="${card.card_type}" class="w-12 h-12 rounded-md object-cover cursor-pointer hover:opacity-80 transition" />
                 </div>
-                <span class="px-3 text-2xl font-semibold text-gray-800">${Number(card.card_price).toLocaleString()}원</span>
+                <span class="px-3 text-2xl font-semibold text-gray-800 pointer-events-none">${Number(card.card_price).toLocaleString()}원</span>
             </div>
 
-            <div class="flex items-center justify-between">
-                <div class="flex flex-wrap gap-1">
+            <div class="flex items-center justify-between mt-2">
+                <div class="truncate flex-1 min-w-0 mr-4">
                     ${membersHTML}
                 </div>
-                <div class="flex items-center gap-1 text-xl text-gray-400">
-                    <img src="https://picsum.photos/64/64" class="w-8 h-8 rounded-md object-cover" />
-                    <span>${(card.card_members || []).length}</span>
+                <div class="flex items-center text-gray-400 font-bold text-lg gap-1 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+                        <path fill-rule="evenodd"
+                        d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z"
+                        clip-rule="evenodd" />
+                    </svg>
+                <span>${card.card_members ? card.card_members.length : 0}</span>
                 </div>
             </div>
-
         </div>
     `
 }

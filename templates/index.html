@@ -55,7 +55,7 @@
                             <button 
                                 type="button"
                                 class="p-2 hover:bg-zinc-100 rounded-md"
-                                onclick="document.getElementById('loginModal').close()" >
+                                onclick="closeModal(document.getElementById('loginModal'))">
                                 ✕
                             </button>
                         </div>
@@ -83,7 +83,7 @@
                             <button
                                 type="button"
                                 class="flex items-center justify-center w-full py-2 text-sm font-semibold bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50 transition"
-                                onclick="document.getElementById('loginModal').close(); document.getElementById('signinModal').showModal()">
+                                onclick="closeModal(document.getElementById('loginModal')); document.getElementById('signinModal').showModal()">
                                 회원가입
                             </button>
                         </div>
@@ -100,7 +100,7 @@
                             <button 
                                 type="button" 
                                 class="p-2 hover:bg-zinc-100 rounded-md"
-                                onclick="document.getElementById('signinModal').close()">
+                                onclick="closeModal(document.getElementById('signinModal'))">
                                 ✕
                             </button>
                         </div>
@@ -135,11 +135,12 @@
                 </form>
             </dialog>
 
-
+            
             <button onclick="location.href='/'">전체</button>
             <button onclick="location.href='/?category=돈까스·회·일식'">돈까스·회·일식</button>
             <button onclick="location.href='/?category=피자'">피자</button>
             <button onclick="location.href='/?category=고기·구이'">고기·구이</button>
+            
 
             <!--카드 그리드-->
             <div class="mt-5 grid grid -cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -167,6 +168,9 @@
                 success: function (response) {
                     if (response['result'] == 'success'){
                         alert('로그인 성공')
+
+                        const modal = document.getElementById("loginModal");
+                        closeModal(modal);
                     }
                     else {
                         alert('로그인 실패!')
@@ -174,6 +178,7 @@
                 }
             });
         }
+        
         //회원가입
         function signin2() {
             let id =$('#id_signin').val();
@@ -192,6 +197,9 @@
                 success: function (response) {
                     if (response['result'] == 'success'){
                         alert('회원가입 성공')
+                        
+                        const modal = document.getElementById("signinModal");
+                        closeModal(modal);
                     }
                     else {
                         alert('회원가입 실패!')
@@ -200,6 +208,12 @@
             });
         }
         
+        //modal close, form reset
+        function closeModal(modalEl) {
+            modalEl.close();
+            modalEl.querySelectorAll("form").forEach(form => form.reset());
+        }
+
         //paegnation
         const grid = document.getElementById("cardsGrid");  //카드 그리드 div
         const sentinel = document.getElementById("scrollSentinel"); //감지용 div
