@@ -142,88 +142,10 @@
             <button onclick="location.href='/?category=고기·구이'">고기·구이</button>
 
             <!--카드 그리드-->
-            <div class="max-w-6xl mx-auto px-4 py-4">
-                <section
-                    id="cardsGrid"
-                    class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {% for card in cards %}
-                        <article
-                            class="card-item bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition p-4 relative"
-                            data-status="{{ card.status }}">
-                            
-                            <!--카드 상단-->
-                            <div class="flex justify-between items-start text-sm">
-                                <!-- 남은 시간 -->
-                                <span class="countdown font-mono text-gray-700">
-                                    00:00:00
-                                </span>
-
-                                <!-- 모집 날짜 -->
-                                <span class="text-gray-400 text-xs">
-                                    {{ card.meet_at }}
-                                </span>
-
-                            </div>
-                            
-                            <!--카드 제목-->
-                            <h3 class="mt-2 font-semibold text-gray-900 truncate">
-                                {{ card.title }}
-                            </h3>
-
-
-                            <!--음식 아이콘, 가격-->
-                            <div class="flex items-center gap-1 min-h-[20px]">
-                                <div class="text-xl">
-                                     {% for icon in (card.icons or []) [:3] %}
-                                        <img src="{{ icon }}" class="w-5 h-5 rounded border bg-white">
-                                    {% endfor %}
-                                </div>
-
-                                <div class="font-semibold text-gray-800">
-                                    {{ "{:,}".format(card.price | default(0) | int )}}원
-                                </div>
-                            </div>
-
-                            <!--카드 하단-->
-                            <div class="flex items-center justify-between mt-3 text-sm">
-
-                                <!--같이 했던 유저-->
-                                {% if card.has_played_with %}
-                                    <span class="text-green-600 font-medium">
-                                        같이 먹은 사람 있음
-                                    </span>
-                                {% endif %}
-
-                                <!--참가자 수-->
-                                <div class="flex items-center text-gray-500">
-                                    👤 {{ (card.card_members or []) | length }}<!--    max_member     /{{ card.capacity }}-->
-                                </div>
-
-                            </div>
-
-                        </article>
-                    {% endfor %}
-                    <!--{% include "_cards.html" %}-->
-                </section>
-                
-                <!--cursor!-->
-                <input type="hidden" id="nextCursor" value="{{ next_cursor or '' }}">
-                <div id="noMoreCards" class="hidden text-center text-gray-400 py-6">
-                    더 이상 모임이 없습니다!
-                </div>
-                <div id="loadingSpinner" class="hidden flex justify-center py-6">
-                    <div class="w-6 h-6 border-4 border-gray-300 border-t-gray-800 rounded-full animate-spin"></div>
-                </div>
-                <div id="scrollSentinel" class="h-10"></div>
-
-                <!--추가 버튼-->
-                <button
-                    type="button"
-                    class="fixed right-6 bottom-6 w-12 h-12 rounded-full bg-emerald-500 text-white shadow-lg hover:brightness-95 active:scale-95 transition flex items-center justify-center text-2xl"
-                    onclick="document.getElementById('newCardModal').showModal()"
-                    aria-label="새 모임 만들기">+
-                </button>
-                
+            <div class="mt-5 grid grid -cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for card in cards %}
+                    {% include 'card.html' %}
+                {% endfor %}
             </div>
         </div>
     </div>
@@ -288,13 +210,13 @@
 
         let loading = false;
         let hasMore = true;
-        // let snapshotTime = {{ snapshot_time | tojson}};
+        let snapshotTime = {{ snapshot_time | tojson}};
 
-        // nextCursor.value= {{ cursor | tojson}};
+        nextCursor.value= {{ cursor | tojson}};
 
-        $(document).ready(function(){
-            loadMore();
-        });
+        //$(document).ready(function(){
+        //    loadMore();
+        //});
 
         async function loadMore(){
             //noCard

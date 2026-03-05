@@ -50,9 +50,9 @@ def home():
       card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
       card['card_type'] = FOOD_IMAGE_MAP.get(card['card_type'])
    return render_template('index.html', 
-                           cards = cards 
-                           # snapshot_time = now,
-                           # cursor = last_card_id 
+                           cards = cards,
+                           snapshot_time = now,
+                           cursor = last_card_id 
                            )
 
 
