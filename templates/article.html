@@ -119,7 +119,7 @@
   const messageInput = document.getElementById('messageInput');
   const socket = io();
 
-  const myNickname = '{{ my_nickname }}';
+  const myNickname = '{{ user.nickname if user else "" }}';
 
   let userId = sessionStorage.getItem('userId');
   if (!userId) {

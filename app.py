@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request, make_response
+from flask import Flask, render_template, jsonify, request, make_response, redirect
 
 #라우터 임포트
 from sockets.socket_message import socketio
@@ -41,10 +41,19 @@ MINIMUM_CARD_LIMIT = 15
 # 기본 화면 api
 @app.route('/')
 def home():
+   # 사용자 인증 확인
+   try:
+      token_receive = request.cookies.get('mytoken')
+      payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+      user_id = payload['id']
+      user = db.users.find_one({'id': user_id}, {'_id': 0, 'pw': 0})
+   except:
+      user = None
+
    category = request.args.get('category')
    query = {'card_type': category} if category else {}
    cards = list(db.cards.find(query)
-               .sort([('is_alive', -1), ('card_duedate', 1)]) 
+               .sort([('is_alive', -1), ('card_duedate', 1)])
                .limit(MINIMUM_CARD_LIMIT))
 
    now = int(time.time())
@@ -54,11 +63,12 @@ def home():
       card['_id'] = str(card['_id'])
       card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
       card['card_type'] = FOOD_IMAGE_MAP.get(card['card_type'])
-   
-   return render_template('index.html', 
-                           cards = cards , 
+
+   return render_template('index.html',
+                           cards = cards ,
                            snapshot_time = now,
-                           cursor = last_card_id 
+                           cursor = last_card_id,
+                           user = user
                            )
 
 
@@ -108,7 +118,7 @@ def login():
          algorithm='HS256'
       )
       response = make_response(jsonify({'result': 'success' , 'token' : token }))
-      response.set_cookie('access_token', token, httponly=True, samesite='Lax')
+      response.set_cookie('mytoken', token, httponly=True, samesite='Lax')
       return response
    else:
       return jsonify({'result': 'fail', 'message': '아이디 또는 비밀번호가 틀렸습니다'})
@@ -133,6 +143,15 @@ def identification():
    except jwt.InvalidTokenError:
       # 토큰 위조됨
       return jsonify({'result': 'fail', 'message': '유효하지 않은 토큰입니다'})
+
+
+# 로그아웃 API
+@app.route('/logout', methods=['POST'])
+def logout():
+   """로그아웃: mytoken 쿠키 삭제 후 메인 페이지로 리다이렉트"""
+   response = make_response(redirect('/'))
+   response.set_cookie('mytoken', '', expires=0)
+   return response
 
 
 
