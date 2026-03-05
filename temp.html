@@ -1,0 +1,62 @@
+<section
+                    id="cardsGrid"
+                    class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {% for card in cards %}
+                        <article
+                            class="card-item bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition p-4 relative"
+                            data-status="{{ card.status }}">
+
+                            <!--카드 상단-->
+                            <div class="flex justify-between items-start text-sm">
+                                <!-- 남은 시간 -->
+                                <span class="countdown font-mono text-gray-700">
+                                    00:00:00
+                                </span>
+
+                                <!-- 모집 날짜 -->
+                                <span class="text-gray-400 text-xs">
+                                    {{ card.meet_at }}
+                                </span>
+
+                            </div>
+
+                            <!--카드 제목-->
+                            <h3 class="mt-2 font-semibold text-gray-900 truncate">
+                                {{ card.title }}
+                            </h3>
+
+
+
+                            <!--음식 아이콘, 가격-->
+                            <div class="flex items-center gap-1 min-h-[20px]">
+                                <div class="text-xl">
+                                     {% for icon in card.icons[:3] or [] %}
+                                        <img src="{{ icon }}" class="w-5 h-5 rounded border bg-white">
+                                    {% endfor %}
+                                </div>
+
+                                <div class="font-semibold text-gray-800">
+                                    {{ "{:,}".format(card.price) }}원
+                                </div>
+                            </div>
+
+                            <!--카드 하단-->
+                            <div class="flex items-center justify-between mt-3 text-sm">
+
+                                <!--같이 했던 유저-->
+                                {% if card.has_played_with %}
+                                    <span class="text-green-600 font-medium">
+                                        같이 먹은 사람 있음
+                                    </span>
+                                {% endif %}
+
+                                <!--참가자 수-->
+                                <div class="flex items-center text-gray-500">
+                                    :bust_in_silhouette: {{ card.card_members | length }}<!--    max_member     /{{ card.capacity }}-->
+                                </div>
+
+                            </div>
+
+                        </article>
+                    {% endfor %}
+                </section>

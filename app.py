@@ -2,11 +2,15 @@ from flask import Flask, render_template, jsonify, request, make_response
 
 #소켓 임포트
 from sockets.socket_message import socketio 
-from routes.socket_message import message_bp
+from routes.message import message_bp
+from routes.user import user_bp
 
-#소켓 초기화
-socketio.init_app(app)  
+app = Flask(__name__)
+
+#외부 등록
+socketio.init_app(app)
 app.register_blueprint(message_bp)
+app.register_blueprint(user_bp)
 
 #추가함
 import jwt
@@ -20,9 +24,7 @@ import requests
 from bs4 import BeautifulSoup
 from bson.objectid import ObjectId
 from apscheduler.schedulers.background import BackgroundScheduler
-from pymongo import MongoClient
-client = MongoClient('mongodb://korobuster001:blueskY114@52.79.125.68', 27017)
-db = client.dbjungle
+from db import db
 
 
 
