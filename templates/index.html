@@ -244,7 +244,7 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        //로그인
+        // 로그인
         function login2() {
 
             let id = $('#id_login').val();
@@ -268,6 +268,14 @@
                 }
             });
         }
+
+        // BFCache에서 페이지 복원 시 새로고침 (로그인 상태 반영)
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                // BFCache에서 복원된 경우
+                location.reload();
+            }
+        });
 
         //회원가입
         function signin2() {
@@ -456,6 +464,7 @@
             slider.scrollLeft = scrollLeft - walk;
         });
     </script>
+
 </body>
 
 </html>
