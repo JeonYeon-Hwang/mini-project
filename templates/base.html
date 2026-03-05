@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>{% block title %}미니프로젝트 | 뭐먹지{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style type="text/css">
+    </style>
+    <script src="{{ url_for('static', filename='js/card.js') }}"></script>
+</head>
+
+<body class="bg-gray-100 text-gray-900">
+    <div class="min-h-screen">
+        <div class="max-w-6xl mx-auto px-4 py-5">
+
+            <!--상단 바-->
+            <div class="flex items-start justify-between gap-4">
+                {% if user %}
+                    <button id="userMenuBtn" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-100 transition" type="button">
+                        <span class="text-sm font-semibold">{{ user.name }}</span>
+                    </button>
+                    <div id="userMenu" class="hidden absolute right-0 mt-2 w-44 rounded-xl bg-white border border-gray-200 shadow-lg overflow-hidden">
+                        <form method="post" action="{{ url_for('logout') }}">
+                            <button type="submit" class="w-full text-left px-4 py-3 text-sm hover:bg-gray-50">로그아웃</button>
+                        </form>
+                    </div>
+                {% else %}
+                    <button
+                        id="openLoginBtn"
+                        class="px-4 py-2 rounded-xl bg-gray-900 text-white text-sm font-semibold hover:brightness-95 active:scale-[0.99] transition"
+                        onclick="document.getElementById('loginModal').showModal()"
+                        type="button">
+                        로그인
+                    </button>
+                {% endif %}
+            </div>
+
+            <!--모달(로그인)-->
+            <dialog id="loginModal" class="p-0">
+                <form method="dialog" class="p-0">
+                    <div class="w-[min(92vw,420px)] rounded-2xl bg-white p-6 shadow-xl">
+                        <div class="mb-4 flex items-center justify-between">
+                            <h2 class="text-lg font-semibold">로그인</h2>
+                            <button type="submit" class="rounded-md p-2 hover:bg-zinc-100">✕</button>
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm text-zinc-700">아이디</label>
+                            <input name="id_give" class="w-full rounded-lg border px-3 py-2 outline-none focus:ring" />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm text-zinc-700">비밀번호</label>
+                            <input type="password" name="pw_give" class="w-full rounded-lg border px-3 py-2 outline-none focus:ring" />
+                        </div>
+                        <button type="button" onclick="login()" class="mt-2 w-full rounded-lg bg-black py-2 text-white hover:bg-zinc-800">로그인</button>
+                        <button type="button" class="w-full rounded-lg border py-2 hover:bg-zinc-50"
+                            onclick="document.getElementById('loginModal').close(); document.getElementById('signinModal').showModal()">
+                            회원가입
+                        </button>
+                    </div>
+                </form>
+            </dialog>
+
+            <!--모달(회원가입)-->
+            <dialog id="signinModal" class="p-0">
+                <form method="dialog" class="p-0">
+                    <div class="w-[min(92vw,420px)] rounded-2xl bg-white p-6 shadow-xl">
+                        <div class="mb-4 flex items-center justify-between">
+                            <h2 class="text-lg font-semibold">회원가입</h2>
+                            <button type="submit" class="rounded-md p-2 hover:bg-zinc-100">✕</button>
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm text-zinc-700">아이디</label>
+                            <input name="id_give" class="w-full rounded-lg border px-3 py-2 outline-none focus:ring" />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm text-zinc-700">비밀번호</label>
+                            <input type="password" name="pw_give" class="w-full rounded-lg border px-3 py-2 outline-none focus:ring" />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm text-zinc-700">닉네임</label>
+                            <input name="nickname_give" class="w-full rounded-lg border px-3 py-2 outline-none focus:ring" />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm text-zinc-700">Slack URL</label>
+                            <input name="slack_url_give" class="w-full rounded-lg border px-3 py-2 outline-none focus:ring" />
+                        </div>
+                        <button type="button" onclick="signin()" class="mt-2 w-full rounded-lg bg-black py-2 text-white hover:bg-zinc-800">가입</button>
+                    </div>
+                </form>
+            </dialog>
+
+            <!--페이지별 콘텐츠-->
+            {% block content %}{% endblock %}
+
+        </div>
+    </div>
+
+    <script>
+        async function login() {
+            const id = document.querySelector("#loginModal input[name='id_give']").value.trim();
+            const pw = document.querySelector("#loginModal input[name='pw_give']").value;
+            if (!id || !pw) { alert("아이디/비밀번호를 입력해주세요!"); return; }
+            try {
+                const res = await fetch("/food/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id_give: id, pw_give: pw }),
+                });
+                const data = await res.json();
+                if (data.result === "success") { location.reload(); }
+                else { alert(data.message || "로그인 실패"); }
+            } catch (e) {
+                console.error(e);
+                alert("서버 통신 오류");
+            }
+        }
+
+        async function signup() {
+            const id = document.querySelector("#signupModal input[name='id_give']").value
+            const pw = document.querySelector("#signupModal input[name='pw_give']").value
+            const nickname = document.querySelector("#signupModal input[name='nickname_give']").value
+            const slack = document.querySelector("#signupModal input[name='slack_url_give']").value
+            const res = await fetch("/food/signin", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id_give: id, pw_give: pw, nickname_give: nickname, slack_url_give: slack })
+            })
+            const data = await res.json()
+            if (data.result === "success") {
+                alert("회원가입 완료!")
+                document.getElementById("signupModal").close()
+            } else {
+                alert(data.message)
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            startCountdowns()
+        })
+    </script>
+
+    {% block scripts %}{% endblock %}
+
+</body>
+</html>
