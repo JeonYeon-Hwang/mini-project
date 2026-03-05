@@ -32,6 +32,7 @@ db = client.dbjungle
 # 기본 화면 api
 @app.route('/')
 def main():
+   # 사실 여기서는 모든 카드를 한꺼번에 보여주지만, 이후에는 페이징 기법을 추가할 예정
    all_cards = list(db.cards.find({}).sort('card_created_date', 1))  
    
    for card in all_cards:
@@ -162,8 +163,8 @@ def show_cards():
          card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
          card['card_type'] = FOOD_IMAGE_MAP.get(card['card_type'])
 
-   # return jsonify({'result' : 'success', 'cards' : all_cards})
-   return render_template('index.html', cards = all_cards)
+   return jsonify({'result' : 'success', 'cards' : all_cards})
+   # return render_template('index.html', cards = all_cards)
 
 
 
