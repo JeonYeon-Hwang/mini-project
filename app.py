@@ -26,6 +26,7 @@ from bson.objectid import ObjectId
 from apscheduler.schedulers.background import BackgroundScheduler
 from pymongo import MongoClient
 from contents import FOOD_IMAGE_MAP
+
 client = MongoClient('mongodb://korobuster001:blueskY114@52.79.125.68', 27017)
 db = client.dbjungle
 
@@ -38,21 +39,33 @@ MINIMUM_CARD_LIMIT = 30
 def home():
    category = request.args.get('category')
    query = {'card_type': category} if category else {}
-   cards = list(db.cards.find(query).limit(MINIMUM_CARD_LIMIT))
+   cards = list(db.cards.find(query).sort('card_duedate', 1).limit(MINIMUM_CARD_LIMIT))
+   cards.sort(key=lambda x: x.get('is_alive', False), reverse=True)
+
+   now = int(time.time())
+   last_card_id = str(cards[-1].get('_id'))
+
    for card in cards:
       card['_id'] = str(card['_id'])
       card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
       card['card_type'] = FOOD_IMAGE_MAP.get(card['card_type'])
-   return render_template('index.html', cards=cards)
+   return render_template('index.html', 
+                           cards = cards,
+                           snapshot_time = now,
+                           cursor = last_card_id 
+                           )
+
+
 
 # 카드 상세 화면 api
-@app.route('/food/<string:card_id>')
+@app.route('/food/<string:card_id>', methods=['GET'])
 def article(card_id):
     card = db.cards.find_one({'_id': ObjectId(card_id)})
     card['_id'] = str(card['_id'])
     card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
-    card['card_type'] = FOOD_IMAGE_MAP.get(card['card_type'])
-    return render_template('article.html', card=card, my_nickname='닉네임')
+    return render_template('article.html', card=card)
+
+
 
 #추가함 회원가입 api
 @app.route('/food/signin', methods=['POST'])
@@ -109,21 +122,21 @@ def login():
 #토큰 검증 확인
 @app.route('/food/identification', methods=['POST'])
 def identification():
-    token_receive = request.form['token_give']
-    
-    try:
-        # 토큰 해독
-        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
-        find_id = payload['id']  # 토큰 안에서 아이디 꺼내기
-        return jsonify({'result': 'success', 'id': find_id})
-    
-    except jwt.ExpiredSignatureError:
-        # 토큰 만료됨 (2시간 지남)
-        return jsonify({'result': 'fail', 'message': '로그인이 만료됐습니다'})
-    
-    except jwt.InvalidTokenError:
-        # 토큰 위조됨
-        return jsonify({'result': 'fail', 'message': '유효하지 않은 토큰입니다'})
+   token_receive = request.form['token_give']
+   
+   try:
+      # 토큰 해독
+      payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+      find_id = payload['id']  # 토큰 안에서 아이디 꺼내기
+      return jsonify({'result': 'success', 'id': find_id})
+   
+   except jwt.ExpiredSignatureError:
+      # 토큰 만료됨 (2시간 지남)
+      return jsonify({'result': 'fail', 'message': '로그인이 만료됐습니다'})
+   
+   except jwt.InvalidTokenError:
+      # 토큰 위조됨
+      return jsonify({'result': 'fail', 'message': '유효하지 않은 토큰입니다'})
 
 
 
@@ -131,7 +144,7 @@ def identification():
 
 @app.route('/food/card/create', methods=['POST'])
 def create_card():
-   token_receive = request.form['token_give']
+   token_receive = request.cookies.get('mytoken')
 
    # 1. 토큰으로 user_id 찾기
    try:
@@ -153,6 +166,7 @@ def create_card():
    now = int(time.time())
    clean_date = card_duedate_receive.replace('T', ' ')
    due_timestamp = int(time.mktime(time.strptime(clean_date, '%Y-%m-%d %H:%M')))
+   first_member = db.users.find_one({'id': user_id_receive}).get('nickname')
 
    card = {
       'user_id' : user_id_receive,
@@ -160,7 +174,7 @@ def create_card():
       'card_text' : card_content_receive,
       'card_duedate' : due_timestamp,
       'card_created_date' : now,
-      'card_members' : [ ],
+      'card_members' : [ first_member ],
       'card_url' : card_url_receive,
       'card_price' : card_price_receive,
       "card_type" : card_type_receive,
@@ -175,15 +189,22 @@ def create_card():
 #모든 카드를 보여주는 api
 @app.route('/food/card/show', methods=['GET'])
 def show_cards():
-   all_cards = list(db.cards.find({}).sort('card_created_date', 1))  
+   all_cards = list(db.cards.find({}).sort('card_duedate', 1))  
+   all_cards.sort(key=lambda x: x.get('is_alive', False), reverse=True)
    
+   now = int(time.time())
+   last_card_id = str(all_cards[-1].get('_id'))
+
    for card in all_cards:
       if '_id' in card:
          card['_id'] = str(card['_id'])
          card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
          card['card_type'] = FOOD_IMAGE_MAP.get(card['card_type'])
 
-   return jsonify({'result' : 'success', 'cards' : all_cards})
+   return jsonify({'result' : 'success', 
+                   'cards' : all_cards, 
+                   'snapshot_time' : now,
+                   'cursor' : last_card_id})
    # return render_template('index.html', cards = all_cards)
 
 
@@ -205,44 +226,44 @@ def show_card_comments(card_id):
 
 
 
-#^^댓글을 등록하는 api
+#댓글을 등록하는 api
 @app.route('/food/post/comments', methods=['POST'])
 def create_comments():
-    token_receive = request.form['token_give']
+   token_receive = request.cookies.get('mytoken')
 
-    # 1. 토큰으로 user_id 찾기
-    try:
-        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
-        user_id = payload['id']
-    except jwt.ExpiredSignatureError:
-        return jsonify({'result': 'fail', 'message': '로그인이 만료됐습니다'})
-    except jwt.InvalidTokenError:
-        return jsonify({'result': 'fail', 'message': '유효하지 않은 토큰입니다'})
+   # 1. 토큰으로 user_id 찾기
+   try:
+      payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+      user_id = payload['id']
+   except jwt.ExpiredSignatureError:
+      return jsonify({'result': 'fail', 'message': '로그인이 만료됐습니다'})
+   except jwt.InvalidTokenError:
+      return jsonify({'result': 'fail', 'message': '유효하지 않은 토큰입니다'})
 
-    # 2. user_id로 닉네임 찾기
-    user_data = db.users.find_one({'id': user_id})
-    nickname = user_data.get('nickname')
+   # 2. user_id로 닉네임 찾기
+   user_data = db.users.find_one({'id': user_id})
+   nickname = user_data.get('nickname')
 
-    card_id_receive = request.form['card_id_give']
-    comment_receive = request.form['comment_give']
-    now = int(time.time())
+   card_id_receive = request.form['card_id_give']
+   comment_receive = request.form['comment_give']
+   now = int(time.time())
 
-    comment = {
-        'card_id': card_id_receive,
-        'user_id': user_id,
-        'nickname': nickname,
-        'comment_sent_time': now,
-        'comment_text': comment_receive
-    }
+   comment = {
+      'card_id': card_id_receive,
+      'user_id': user_id,
+      'nickname': nickname,
+      'comment_sent_time': now,
+      'comment_text': comment_receive
+   }
 
-    db.comments.insert_one(comment)
-    return jsonify({'result': 'success', 'message': '댓글이 등록됐습니다!'})
+   db.comments.insert_one(comment)
+   return jsonify({'result': 'success', 'message': '댓글이 등록됐습니다!'})
 
 #^^특정 카드에 가입하는 api, 이미 가입 되었을 시 => 실패 메시지 발송
 @app.route('/food/join', methods=['POST'])
 def join_club():
    card_id_receive = request.form['card_id_give']
-   token_receive = request.form['token_give']
+   token_receive = request.cookies.get('mytoken')
 
    try:
       payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
@@ -270,27 +291,59 @@ def join_club():
 #^^특정 카드에서 탈퇴하는 api
 @app.route('/food/exit', methods=['POST'])
 def exit_club():
-    token_receive = request.form['token_give']
-    card_id_receive = request.form['card_id_give']
+   token_receive = request.form['token_give']
+   card_id_receive = request.form['card_id_give']
 
-    # 1. 토큰으로 user_id 찾기
-    try:
-        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
-        user_id = payload['id']
-    except jwt.ExpiredSignatureError:
-        return jsonify({'result': 'fail', 'message': '로그인이 만료됐습니다'})
-    except jwt.InvalidTokenError:
-        return jsonify({'result': 'fail', 'message': '유효하지 않은 토큰입니다'})
+   # 1. 토큰으로 user_id 찾기
+   try:
+      payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+      user_id = payload['id']
+   except jwt.ExpiredSignatureError:
+      return jsonify({'result': 'fail', 'message': '로그인이 만료됐습니다'})
+   except jwt.InvalidTokenError:
+      return jsonify({'result': 'fail', 'message': '유효하지 않은 토큰입니다'})
 
-    # 2. user_id로 닉네임 찾기
-    user_data = db.users.find_one({'id': user_id})
-    nickname = user_data.get('nickname')
+   # 2. user_id로 닉네임 찾기
+   user_data = db.users.find_one({'id': user_id})
+   nickname = user_data.get('nickname')
 
-    db.cards.update_one(
-        {'_id': ObjectId(card_id_receive)},
-        {'$pull': {'card_members': nickname}}
-    )
-    return jsonify({'result': 'success', 'message': '탈퇴가 완료됐습니다!'})
+   db.cards.update_one(
+      {'_id': ObjectId(card_id_receive)},
+      {'$pull': {'card_members': nickname}}
+   )
+   return jsonify({'result': 'success', 'message': '탈퇴가 완료됐습니다!'})
+
+
+
+@app.route('/food/show_more/')
+def show_more():
+   cursor_id = request.args.get('cursor')
+   snapshot_time = int(request.args.get('as_of'))
+   
+   query = {'card_created_date' : { '$lte' : snapshot_time }}
+   last_card = db.cards.find_one({'_id': ObjectId(cursor_id)})
+   last_due = last_card['card_duedate']
+
+   query['$or'] = [
+                {'card_duedate': {'$gt': last_due}},
+                {'card_duedate': last_due, '_id': {'$gt': ObjectId(cursor_id)}}
+            ]
+   
+   cards = list(db.cards.find(query).sort('card_duedate', 1).limit(MINIMUM_CARD_LIMIT))
+   cards.sort(key=lambda x: x.get('is_alive', False), reverse=True)
+
+   next_cursor = str(cards[-1]['_id']) if cards else None
+   has_more = len(cards) == MINIMUM_CARD_LIMIT
+   html_snippet = render_template("index.html", cards=cards)
+
+   return jsonify({
+        "result": "success", 
+        "html": html_snippet, 
+        "next_cursor": next_cursor, 
+        "has_more": has_more
+   })
+   # return jsonify({'result': 'success', 'message': '아직 준비 중'})
+
 
 
 
@@ -311,7 +364,7 @@ def scheduled_job():
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(scheduled_job, 'interval', seconds=3600)
+scheduler.add_job(scheduled_job, 'interval', seconds=180)
 scheduler.start()
 
 
