@@ -17,9 +17,11 @@
     <div class="flex items-center justify-between mt-2">
         <div class="truncate flex-1 min-w-0 mr-4">
             {% for member in card.card_members %}
+            {% if loop.index0 > 0 %}
             <button type="button" onclick="onMemberClick(event, '{{ member }}')"
                 class="text-xl font-medium text-gray-400 cursor-pointer mr-1 hover:text-gray-500 transition">#{{ member
                 }}</button>
+            {% endif %}
             {% endfor %}
         </div>
         <div class="flex items-center text-gray-400 font-bold text-lg gap-1 shrink-0">

@@ -20,9 +20,7 @@
                 <div class="max-w-6xl mx-auto px-4 py-3">
                     <div class="flex items-center gap-2">
                         <!--전체-->
-                        <button
-                            type="button"
-                            onclick="location.href='/'"
+                        <button type="button" onclick="location.href='/'"
                             class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
                                 hover:bg-white hover:shadow-sm border border-transparent
                                 {% if not request.args.get('category') %}bg-white border-gray-200 shadow-sm{% endif %}">
@@ -31,81 +29,63 @@
                         <!-- 카테고리 -->
                         <nav id="categoryScroll" class="flex items-center gap-2 sm:gap-3 overflow-x-auto whitespace-nowrap
                             [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ">
-                            <button
-                                type="button"
-                                onclick="location.href='/?category=돈까스·회·일식'"
+                            <button type="button" onclick="location.href='/?category=돈까스·회·일식'"
                                 class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
                                     hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
                                     {% if request.args.get('category') == '돈까스·회·일식' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
                                 돈까스·회·일식
                             </button>
 
-                            <button
-                                type="button"
-                                onclick="location.href='/?category=피자'"
+                            <button type="button" onclick="location.href='/?category=피자'"
                                 class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
                                     hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
                                     {% if request.args.get('category') == '피자' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
                                 피자
                             </button>
 
-                            <button
-                                type="button"
-                                onclick="location.href='/?category=고기·구이'"
+                            <button type="button" onclick="location.href='/?category=고기·구이'"
                                 class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
                                     hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
                                     {% if request.args.get('category') == '고기·구이' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
                                 고기·구이
                             </button>
 
-                            <button
-                                type="button"
-                                onclick="location.href='/?category=양식'"
+                            <button type="button" onclick="location.href='/?category=양식'"
                                 class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
                                     hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
                                     {% if request.args.get('category') == '양식' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
                                 양식
                             </button>
 
-                            <button
-                                type="button"
-                                onclick="location.href='/?category=치킨'"
+                            <button type="button" onclick="location.href='/?category=치킨'"
                                 class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
                                     hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
                                     {% if request.args.get('category') == '치킨' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
                                 치킨
                             </button>
 
-                            <button
-                                type="button"
-                                onclick="location.href='/?category=중식'"
+                            <button type="button" onclick="location.href='/?category=중식'"
                                 class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
                                     hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
                                     {% if request.args.get('category') == '중식' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
                                 중식
                             </button>
 
-                            <button
-                                type="button"
-                                onclick="location.href='/?category=패스트푸드'"
+                            <button type="button" onclick="location.href='/?category=패스트푸드'"
                                 class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
                                     hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
                                     {% if request.args.get('category') == '패스트푸드' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
                                 패스트푸드
                             </button>
 
-                            <button
-                                type="button"
-                                onclick="location.href='/?category=분식'"
+                            <button type="button" onclick="location.href='/?category=분식'"
                                 class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
                                     hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
                                     {% if request.args.get('category') == '분식' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
                                 분식
                             </button>
 
-                            <button
-                                type="button"
-                                onclick="location.href='/?category=도시락'"
+                            <button type="button" onclick="location.href='/?category=도시락'"
                                 class="px-4 py-3 rounded-xl text-3xl font-bold bg-gray-200 text-gray-900 border border-transparent whitespace-nowrap
                                     hover:bg-white hover:shadow-sm border border-transparent text-gray-700 hover:text-gray-900
                                     {% if request.args.get('category') == '도시락' %}bg-white text-gray-900 border-gray-200 shadow-sm{% endif %}">
@@ -116,13 +96,13 @@
                         <div class="flex items-center justify-end">
                             {% if user %}
                             <div class="flex items-center gap-3">
-                                <span class="title px-5 py-4 w-48 break-words text-2xl text-center font-bold text-grey-900 bg-grey-500 rounded-full">
+                                <span
+                                    class="title px-5 py-4 w-48 break-words text-2xl text-center font-bold text-grey-900 bg-grey-500 rounded-full">
                                     {{ user.nickname }} 님
                                 </span>
 
                                 <form method="post" action="{{ url_for('logout') }}">
-                                    <button
-                                        type="submit"
+                                    <button type="submit"
                                         class="whitespace-nowrap px-4 py-3 text-xl font-semibold text-white bg-gray-800 rounded-lg hover:bg-gray-700 transition">
                                         로그아웃
                                     </button>
@@ -130,18 +110,16 @@
 
                                 {% else %}
 
-                                <button
-                                    type="button"
-                                    id="openLoginBtn"
+                                <button type="button" id="openLoginBtn"
                                     onclick="document.getElementById('loginModal').showModal()"
                                     class="whitespace-nowrap whitespace-nowrappx-4 px-4 py-3 text-xl font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-800">
                                     로그인
                                 </button>
 
-                            {% endif %}
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
-                </div>
             </header>
 
             <!--모달(로그인)-->
@@ -150,9 +128,7 @@
                     <div class="flex flex-col w-[min(92vw,420px)] p-6 gap-4 bg-white rounded-2xl shadow-xl">
                         <div class="flex items-center justify-between mb-4">
                             <h2 class="text-2xl font-semibold">로그인</h2>
-                            <button 
-                                type="button"
-                                class="p-2 hover:bg-zinc-100 rounded-md"
+                            <button type="button" class="p-2 hover:bg-zinc-100 rounded-md"
                                 onclick="closeModal(document.getElementById('loginModal'))">
                                 ✕
                             </button>
@@ -160,17 +136,18 @@
 
                         <div class="flex flex-col gap-2">
                             <label class="block mb-1 text-xl text-zinc-700">아이디</label>
-                            <input id="id_login" class="w-full px-3 py-2 text-sm bg-white border border-zinc-300 rounded-lg outline-none focus:ring"/>
+                            <input id="id_login"
+                                class="w-full px-3 py-2 text-sm bg-white border border-zinc-300 rounded-lg outline-none focus:ring" />
                         </div>
 
                         <div class="flex flex-col gap-2">
                             <label class="block mb-1 text-xl text-zinc-700">비밀번호</label>
-                            <input type="password" id="pw_login" class="w-full px-3 py-2 text-sm bg-white border border-zinc-300 rounded-lg outline-none focus:ring"/>
+                            <input type="password" id="pw_login"
+                                class="w-full px-3 py-2 text-sm bg-white border border-zinc-300 rounded-lg outline-none focus:ring" />
                         </div>
 
                         <div>
-                            <button 
-                                type="button" 
+                            <button type="button"
                                 class="flex items-center justify-center w-full py-2 text-xl font-semibold text-white bg-black rounded-lg hover:bg-zinc-800 transition"
                                 onclick="login2()">
                                 로그인
@@ -178,8 +155,7 @@
                         </div>
 
                         <div>
-                            <button
-                                type="button"
+                            <button type="button"
                                 class="flex items-center justify-center w-full py-2 text-xl font-semibold bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50 transition"
                                 onclick="closeModal(document.getElementById('loginModal')); document.getElementById('signinModal').showModal()">
                                 회원가입
@@ -195,9 +171,7 @@
                     <div class="flex flex-col w-[min(92vw,420px)] p-6 gap-4 bg-white rounded-2xl shadow-xl">
                         <div class="flex items-center justify-between mb-4">
                             <h2 class="text-2xl font-semibold">회원가입</h2>
-                            <button 
-                                type="button" 
-                                class="p-2 hover:bg-zinc-100 rounded-md"
+                            <button type="button" class="p-2 hover:bg-zinc-100 rounded-md"
                                 onclick="closeModal(document.getElementById('signinModal'))">
                                 ✕
                             </button>
@@ -205,26 +179,29 @@
 
                         <div class="flex flex-col gap-2">
                             <label class="block mb-1 text-xl text-zinc-700">아이디</label>
-                            <input id="id_signin" class="w-full px-3 py-2 text-sm bg-white border border-zinc-300 rounded-lg outline-none focus:ring"/>
+                            <input id="id_signin"
+                                class="w-full px-3 py-2 text-sm bg-white border border-zinc-300 rounded-lg outline-none focus:ring" />
                         </div>
 
                         <div class="flex flex-col gap-2">
                             <label class="block mb-1 text-xl text-zinc-700">비밀번호</label>
-                            <input type="password" id="pw_signin" class="w-full px-3 py-2 text-sm bg-white border border-zinc-300 rounded-lg outline-none focus:ring"/>
+                            <input type="password" id="pw_signin"
+                                class="w-full px-3 py-2 text-sm bg-white border border-zinc-300 rounded-lg outline-none focus:ring" />
                         </div>
 
                         <div class="flex flex-col gap-2">
                             <label class="mb-1 block text-xl text-zinc-700">닉네임</label>
-                            <input id="nickname_signin" class="w-full px-3 py-2 text-sm bg-white border border-zinc-300 rounded-lg outline-none focus:ring"/>
+                            <input id="nickname_signin"
+                                class="w-full px-3 py-2 text-sm bg-white border border-zinc-300 rounded-lg outline-none focus:ring" />
                         </div>
 
                         <div class="flex flex-col gap-2">
                             <label class="mb-1 block text-xl text-zinc-700">Slack URL</label>
-                            <input id="slack_url_signin" class="w-full px-3 py-2 text-sm bg-white border border-zinc-300 rounded-lg outline-none focus:ring"/>
+                            <input id="slack_url_signin"
+                                class="w-full px-3 py-2 text-sm bg-white border border-zinc-300 rounded-lg outline-none focus:ring" />
                         </div>
 
-                        <button 
-                            type="button"
+                        <button type="button"
                             class="flex items-center justify-center w-full py-2 text-xl font-semibold text-white bg-black rounded-lg hover:bg-zinc-800 transition"
                             onclick="signin2()">
                             가입
@@ -236,7 +213,7 @@
             <!--카드 그리드-->
             <div id="cards-box" class="mt-5 grid grid -cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {% for card in cards %}
-                    {% include 'card.html' %}
+                {% include 'card.html' %}
                 {% endfor %}
             </div>
         </div>
@@ -253,11 +230,12 @@
             $.ajax({
                 type: 'POST',
                 url: '/food/login',
-                data: { id_give: id,
-                        pw_give: pw
+                data: {
+                    id_give: id,
+                    pw_give: pw
                 },
                 success: function (response) {
-                    if (response['result'] == 'success'){
+                    if (response['result'] == 'success') {
                         alert('로그인 성공')
 
                         location.reload();
@@ -270,7 +248,7 @@
         }
 
         // BFCache에서 페이지 복원 시 새로고침 (로그인 상태 반영)
-        window.addEventListener('pageshow', function(event) {
+        window.addEventListener('pageshow', function (event) {
             if (event.persisted) {
                 // BFCache에서 복원된 경우
                 location.reload();
@@ -279,21 +257,22 @@
 
         //회원가입
         function signin2() {
-            let id =$('#id_signin').val();
-            let pw =$('#pw_signin').val();
-            let nickname =$('#nickname_signin').val();
-            let slack_url =$('#slack_url_signin').val();
+            let id = $('#id_signin').val();
+            let pw = $('#pw_signin').val();
+            let nickname = $('#nickname_signin').val();
+            let slack_url = $('#slack_url_signin').val();
 
             $.ajax({
                 type: 'POST',
                 url: '/food/signin',
-                data: { id_give: id,
-                        pw_give: pw,
-                        nickname_give: nickname,
-                        slack_url_give: slack_url
+                data: {
+                    id_give: id,
+                    pw_give: pw,
+                    nickname_give: nickname,
+                    slack_url_give: slack_url
                 },
                 success: function (response) {
-                    if (response['result'] == 'success'){
+                    if (response['result'] == 'success') {
                         alert('회원가입 성공')
 
                         const modal = document.getElementById("signinModal");
@@ -330,7 +309,7 @@
         //    loadMore();
         //});
 
-        async function loadMore(){
+        async function loadMore() {
             //noCard
             if (nextCursor.value == "noCard") { hasMore = false; }
 
@@ -368,7 +347,7 @@
                 grid.insertAdjacentHTML("beforeend", data.html);
                 nextCursor.value = data.next_cursor || "";
                 hasMore = !!(data.has_more && data.next_cursor);
-            } 
+            }
             else {
                 hasMore = false;
             }
@@ -377,7 +356,7 @@
             spinner.classList.add("hidden");
         }
         //감지 시작
-        const io = new IntersectionObserver((entries)=>{if(entries[0].isIntersecting) loadMore();}, { rootMargin: "300px" });
+        const io = new IntersectionObserver((entries) => { if (entries[0].isIntersecting) loadMore(); }, { rootMargin: "300px" });
 
         io.observe(sentinel);
 
@@ -391,7 +370,7 @@
         let isLoading = false;
         let isNotLimit = true;
 
-        window.onscroll = function() {
+        window.onscroll = function () {
             if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 100) {
                 if (!isLoading && isNotLimit) {
                     console.log("스크롤 감지, 현재 페이지: " + currentPage)
@@ -403,16 +382,16 @@
         function loadMore() {
             isLoading = true;
             let nextPage = currentPage + 1;
-            
+
             fetch(`/food/show_more/${nextPage}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.result === 'success') {
-                    
-                        const box = document.getElementById('cards-box');                        
+
+                        const box = document.getElementById('cards-box');
                         if (box) {
                             data.cards.forEach(card => {
-                                const html = createCardHTML(card); 
+                                const html = createCardHTML(card);
                                 box.insertAdjacentHTML('beforeend', html);
                             });
 
@@ -420,7 +399,7 @@
                             isNotLimit = data.has_more;
                         } else {
                             console.error("아이디가 'cards-box'인 태그를 찾을 수 없어!");
-                        }                       
+                        }
                     }
                     isLoading = false;
                 })
@@ -428,7 +407,7 @@
                     console.error("로딩 에러:", err);
                     isLoading = false;
                 });
-    
+
         }
     </script>
     <!--카테고리 마우스 이동-->
@@ -465,6 +444,28 @@
         });
     </script>
 
+    <!-- 플로팅 액션 버튼 (생성 버튼) -->
+    <div class="fixed bottom-8 left-0 right-0 pointer-events-none z-50 flex justify-end max-w-6xl mx-auto px-4">
+        {% if user %}
+        <button onclick="openAddModal()"
+            class="pointer-events-auto w-20 h-20 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white rounded-full shadow-2xl flex items-center justify-center transition-transform hover:scale-105 active:scale-95 cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+        </button>
+        {% else %}
+        <button onclick="document.getElementById('loginModal').showModal()"
+            class="pointer-events-auto w-20 h-20 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white rounded-full shadow-2xl flex items-center justify-center transition-transform hover:scale-105 active:scale-95 cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+        </button>
+        {% endif %}
+    </div>
+
+    {% include "article_add.html" %}
 </body>
 
 </html>

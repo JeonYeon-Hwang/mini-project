@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 {% block title %}뭐먹지{{ card.card_title }}{% endblock %}
 {% block content %}
-<main class="flex-1 flex flex-col min-h-0 pt-4 overflow-hidden">
-  <div class="flex-1 flex gap-4 p-4 bg-blue-100 rounded-2xl overflow-hidden">
-    <div class="w-1/2 flex flex-col bg-white/60 p-6 rounded-xl shadow-sm overflow-y-auto">
+<main class="flex-1 flex flex-col min-h-0 pt-2 overflow-hidden">
+  <div class="flex-1 flex gap-4 p-4 bg-blue-100 rounded-2xl overflow-hidden min-h-0">
+    <div class="w-1/2 flex flex-col bg-white/60 p-6 rounded-xl shadow-sm overflow-y-auto min-h-0">
       <div class="relative flex justify-center mb-2">
         <div class="flex flex-col items-center">
           <span class="text-6xl font-bold text-gray-500 countdown" data-duedate="{{ card.card_duedate }}"></span>
@@ -33,8 +33,8 @@
       <h2 class="text-xl sm:text-4xl font-bold text-black mt-4 mb-8 line-clamp-2 leading-snug">{{card.card_title}}</h2>
       <div class="flex items-center justify-end gap-3 mb-4">
         <img src="{{ card.card_type }}"
-          class="w-10 h-10 rounded-md object-cover cursor-pointer hover:opacity-80 transition"
-          onclick="onMenuClick(event, '{{ card._id }}')" />
+          class="w-20 h-20 rounded-md object-cover cursor-pointer hover:opacity-80 transition"
+          onclick="onMenuClick(event, '{{ card.card_url }}')" />
         <span class="font-extrabold text-gray-700 text-3xl">{{ "{:,}".format(card.card_price | default(0) |
           int)}}원</span>
         <div class="flex items-center text-gray-400 font-bold text-3xl gap-1 ml-2">
@@ -51,21 +51,25 @@
           class="flex flex-wrap gap-2 overflow-hidden flex-1 min-w-0 content-start items-start"
           style="min-height: calc(2 * (2.25rem + 0.5rem)); max-height: calc(2 * (2.25rem + 0.5rem));">
           {% for member in card.card_members %}
+          {% if loop.index0 > 0 %}
           <div class="flex items-center bg-black text-white rounded-xl pl-3 pr-1 py-1 shadow-sm member-badge"
             data-member="{{ member }}">
             <button type="button" class="font-bold text-base mr-2 hover:text-gray-300 transition"
               onclick="onMemberClick(event, '{{ member }}')">
               {{ member }}
             </button>
+            {% if not user or member != user.nickname %}
             <button type="button" data-member="{{ member }}"
-              class="w-6 h-6 flex items-center justify-center bg-gray-600 rounded-lg hover:bg-gray-500 transition member-remove-btn"
+              class="w-6 h-6 flex items-center justify-center bg-gray-600 rounded-lg hover:bg-gray-500 transition member-remove-btn hidden"
               onclick="onRemoveMemberClick(event, '{{ member }}')">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor" stroke-width="3">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
+            {% endif %}
           </div>
+          {% endif %}
           {% endfor %}
         </div>
         <div class="shrink-0 flex flex-col gap-1">
@@ -92,10 +96,9 @@
         <p class="text-gray-700 text-base">{{ card.card_text }}</p>
       </div>
     </div>
-    <div class="relative w-1/2 flex flex-col bg-white rounded-2xl shadow-md border border-blue-200 overflow-hidden">
-      <!-- 최상위 플로팅 버튼 바 -->
+    <div
+      class="relative w-1/2 flex flex-col bg-white rounded-2xl shadow-md border border-blue-200 overflow-hidden min-h-0">
       <div class="absolute top-3 left-3 right-3 flex justify-between z-20 pointer-events-none">
-
         <button type="button" id="status-toggle-btn" onclick="onStatusToggleClick(event)"
           class="pointer-events-auto px-6 py-2 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white text-xl font-bold rounded-xl shadow-lg transition cursor-pointer">
           참여하기
@@ -109,20 +112,20 @@
           </svg>
         </button>
       </div>
-      <div id="chatBox" class="flex-1 overflow-y-auto px-4 pt-16 pb-2 space-y-2"></div>
-      <div class="px-4 py-3 border-t border-gray-200 flex gap-2">
+      <div id="chatBox" class="flex-1 overflow-y-auto px-4 pt-16 pb-2 space-y-2 min-h-0"></div>
+      <div class="px-4 py-3 border-t border-gray-200 flex gap-2 shrink-0">
         <input id="messageInput" type="text"
-          class="flex-1 border border-gray-300 rounded-lg px-4 py-3 text-base outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-300 transition"
-          placeholder="메시지를 입력하세요..." />
-        <button onclick="sendMessage()"
-          class="bg-blue-500 hover:bg-blue-600 text-white text-base font-medium px-5 py-3 rounded-lg transition">
+          class="flex-1 border border-gray-300 rounded-lg px-4 py-3 text-base outline-none transition {% if user %}focus:border-blue-400 focus:ring-1 focus:ring-blue-300{% else %}bg-gray-100 text-gray-500 cursor-not-allowed{% endif %}"
+          placeholder="{% if user %}메시지를 입력하세요...{% else %}로그인 후 이용할 수 있습니다.{% endif %}" {% if not user %}disabled{%
+          endif %} />
+        <button onclick="sendMessage()" {% if not user %}disabled{% endif %}
+          class="text-white text-base font-medium px-5 py-3 rounded-lg transition {% if user %}bg-blue-500 hover:bg-blue-600{% else %}bg-gray-400 cursor-not-allowed{% endif %}">
           전송
         </button>
       </div>
     </div>
   </div>
 </main>
-</div>
 <div id="page-data" class="hidden" data-nickname="{{ user.nickname if user else '' }}"
   data-userid="{{ user.id if user else '' }}" data-writerid="{{ card.user_id }}"
   data-members='{{ card.card_members | tojson | safe }}'>
@@ -130,6 +133,10 @@
 
 <script type="application/json" id="cardDataJson">
   {{ card | tojson | safe }}
+</script>
+
+<script type="application/json" id="commentsDataJson">
+  {{ comments | tojson | safe if comments else '[]' }}
 </script>
 
 <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
@@ -145,7 +152,6 @@
   const messageInput = document.getElementById('messageInput');
   const socket = io();
 
-<<<<<<< HEAD
   const pageData = document.getElementById('page-data').dataset;
   const nickname = pageData.nickname || null;
   const myUserId = pageData.userid || null;
@@ -163,9 +169,6 @@
       } else {
         userRole = UserRole.GUEST;
       }
-
-      alert(userRole);
-      alert(nickname);
     }
 
     const isAdmin = (userRole === UserRole.AUTHOR);
@@ -181,7 +184,7 @@
       else btn.classList.add('hidden');
     });
 
-    // 3. 참여 상태 버튼 제어
+    // 참여 상태 버튼 제어
     const statusBtn = document.getElementById('status-toggle-btn');
     if (statusBtn) {
       if (!nickname) {
@@ -189,16 +192,15 @@
         statusBtn.classList.replace('bg-blue-500', 'bg-gray-400');
         statusBtn.classList.replace('hover:bg-blue-600', 'hover:bg-gray-500');
         statusBtn.classList.replace('active:bg-blue-700', 'active:bg-gray-600');
-        // 로그인 안 되어 있으면 클릭 시 로그인 모달을 띄우게 할 수도 있습니다.
+        // 로그인 x
         statusBtn.onclick = (e) => { e.stopPropagation(); document.getElementById('loginModal').showModal(); };
         return;
       }
 
-      // 원래의 onStatusToggleClick 이벤트를 다시 연결
       statusBtn.onclick = onStatusToggleClick;
 
       if (userRole === UserRole.AUTHOR) {
-        // 작성자: 아직 모집 여부 토글 기능이 없다면 임시로 비활성화
+        // 작성자
         statusBtn.innerText = "모집 중 (비활성)";
         statusBtn.disabled = true;
         statusBtn.classList.replace('bg-blue-500', 'bg-gray-400');
@@ -207,7 +209,7 @@
         statusBtn.classList.add('opacity-70', 'cursor-not-allowed');
 
       } else if (userRole === UserRole.MEMBER) {
-        // 멤버: 탈퇴하기 버튼으로 변경
+        // 멤버
         statusBtn.innerText = "나가기";
         statusBtn.disabled = false;
         statusBtn.classList.replace('bg-blue-500', 'bg-red-500');
@@ -216,7 +218,7 @@
         statusBtn.classList.remove('opacity-70', 'cursor-not-allowed', 'bg-gray-400', 'hover:bg-gray-500', 'active:bg-gray-600');
 
       } else {
-        // 게스트: 참여하기 버튼으로 변경
+        // 게스트
         statusBtn.innerText = "참여하기";
         statusBtn.disabled = false;
         statusBtn.classList.remove('bg-red-500', 'hover:bg-red-600', 'active:bg-red-700', 'opacity-70', 'cursor-not-allowed', 'bg-gray-400', 'hover:bg-gray-500', 'active:bg-gray-600');
@@ -227,6 +229,7 @@
 
   initUserRole();
   const myNickname = '{{ user.nickname if user else "" }}';
+  const cardId = '{{ card._id }}';
 
   let userId = sessionStorage.getItem('userId');
   if (!userId) {
@@ -234,15 +237,38 @@
     sessionStorage.setItem('userId', userId);
   }
 
+  socket.emit('join', { room: cardId });
+
   messageInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
 
-  function sendMessage() {
+  async function sendMessage() {
     const text = messageInput.value.trim();
     if (!text) return;
     messageInput.value = '';
     messageInput.focus();
-    // myNickname이 유효하면 사용, 아니면 nickname 사용
-    socket.emit('message', { text, userId, nickname: myNickname ? myNickname : (nickname || '') });
+
+    if (!myNickname) {
+      alert("로그인이 필요합니다.");
+      document.getElementById('loginModal').showModal();
+      return;
+    }
+
+    try {
+      const response = await fetch('/food/post/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          'card_id_give': cardId,
+          'comment_give': text
+        })
+      });
+      const data = await response.json();
+      if (data.result !== 'success') {
+        alert(data.message || '댓글 등록 실패');
+      }
+    } catch (e) {
+      alert("서버 연결에 실패했습니다.");
+    }
   }
 
   function appendMessage(text, sender, nickname = '') {
@@ -250,7 +276,7 @@
     wrapper.className = sender === 'me' ? 'flex justify-end' : 'flex flex-col items-start';
     if (sender === 'other' && nickname) {
       const nameEl = document.createElement('span');
-      nameEl.className = 'text-xs text-gray-400 mb-1 ml-1';
+      nameEl.className = 'text-sm font-bold text-gray-700 mb-1 ml-1';
       nameEl.textContent = nickname;
       wrapper.appendChild(nameEl);
     }
@@ -264,27 +290,25 @@
     chatBox.scrollTop = chatBox.scrollHeight;
   }
 
-  fetch('/messages')
-    .then(res => res.json())
-    .then(data => data.messages.forEach(msg => {
-      const sender = msg.userId === userId ? 'me' : 'other';
-      appendMessage(msg.text, sender, sender === 'other' ? msg.nickname : '');
-    }));
 
-  socket.on('message', data => {
-    const sender = data.userId === userId ? 'me' : 'other';
+  const commentsDataStr = document.getElementById('commentsDataJson').textContent;
+  const dbComments = JSON.parse(commentsDataStr.trim() || '[]');
+  dbComments.forEach(msg => {
+    const sender = (myNickname && myNickname === msg.nickname) ? 'me' : 'other';
+    appendMessage(msg.comment_text, sender, sender === 'other' ? msg.nickname : '');
+  });
+
+  socket.on('new_message', data => {
+    const sender = (myNickname && myNickname === data.nickname) ? 'me' : 'other';
     appendMessage(data.text, sender, sender === 'other' ? data.nickname : '');
   });
 
   async function onStatusToggleClick(event) {
     event.stopPropagation();
 
-    const cardId = '{{ card._id }}';
-
     if (userRole === UserRole.GUEST) {
-      if (confirm("이 모임에 참여하시겠습니까?")) {
+      if (confirm("참여하시겠습니까?")) {
         try {
-          // jQuery 등 ajax 대신 fetch API 사용 예시
           const response = await fetch('/food/join', {
             method: 'POST',
             body: new URLSearchParams({ 'card_id_give': cardId })
@@ -292,7 +316,7 @@
           const data = await response.json();
           if (data.result === 'success') {
             alert(data.msg);
-            location.reload(); // 새로고침하여 멤버 목록 및 권한 갱신 (또는 initUserRole 재실행 등)
+            location.reload();
           } else {
             alert(data.msg || data.message || "오류가 발생했습니다.");
           }
@@ -305,14 +329,11 @@
     }
 
     if (userRole === UserRole.MEMBER) {
-      if (confirm("이 모임에서 나가시겠습니까?")) {
+      if (confirm("나가시겠습니까?")) {
         try {
           const response = await fetch('/food/exit', {
             method: 'POST',
             body: new URLSearchParams({
-              // 주의: exit api 에서 token_give 를 필수로 받도록 되어 있으면 같이 보내야 합니다.
-              // 쿠키에 있다면 서버에서 알아서 가져오도록 API 수정하는 것이 좋으나, 
-              // 현재 app.py 백엔드 구조에 맞춰서 전송합니다.
               'token_give': document.cookie.replace(/(?:(?:^|.*;\s*)mytoken\s*\=\s*([^;]*).*$)|^.*$/, "$1") || document.cookie.replace(/(?:(?:^|.*;\s*)access_token\s*\=\s*([^;]*).*$)|^.*$/, "$1"),
               'card_id_give': cardId
             })
@@ -333,8 +354,7 @@
     }
 
     if (userRole === UserRole.AUTHOR) {
-      // 작성자 상태 변경 로직 (현재는 비활성화됨)
-      alert('작성자의 모집 상태 변경 기능은 준비 중입니다.');
+      //alert('작성자');
     }
   }
 </script>
@@ -375,21 +395,53 @@
     navigator.clipboard.writeText(names);
   }
 
-  function onMenuClick(event, cardId) {
+  function onMenuClick(event, url) {
     event.stopPropagation();
+    if (url && url !== 'None' && url.trim() !== '') {
+      window.open(url, '_blank');
+    }
   }
 
-  function onMemberClick(event, memberName) {
+  async function onMemberClick(event, memberName) {
     event.stopPropagation();
-    // 유저 프로필
+    try {
+      const response = await fetch(`/food/profile?nickname=${encodeURIComponent(memberName)}`);
+      const data = await response.json();
+      if (data.result === 'success' && data.slack_url) {
+        window.open(data.slack_url, '_blank');
+      } else {
+        alert(data.message || '사용자를 찾을 수 없습니다.');
+      }
+    } catch (error) {
+      alert('서버 연결에 실패했습니다.');
+    }
   }
 
-  function onRemoveMemberClick(event, memberName) {
+  async function onRemoveMemberClick(event, memberName) {
     event.stopPropagation();
+    if (confirm(`탈퇴시키겠습니까?`)) {
+      try {
+        const cardId = '{{ card._id }}';
+        const response = await fetch('/food/exit', {
+          method: 'POST',
+          body: new URLSearchParams({
+            'card_id_give': cardId,
+            'target_nickname': memberName
+          })
+        });
+        const data = await response.json();
 
-
-    //@app.route('/food/exit', methods=['POST']) 
-    document.querySelector(`.member-badge[data-member="${memberName}"]`)?.remove();
+        if (data.result === 'success') {
+          alert(data.message);
+          document.querySelector(`.member-badge[data-member="${memberName}"]`)?.remove();
+        } else {
+          alert(data.message || '오류가 발생했습니다.');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('서버 연결에 실패했습니다.');
+      }
+    }
   }
 
   function toggleArticleMenu(event) {
@@ -417,15 +469,33 @@
     }
   }
 
-  function onDeleteArticleClick() {
+  async function onDeleteArticleClick() {
     const dropdown = document.getElementById('articleMenuDropdown');
     if (dropdown) dropdown.classList.add('hidden');
 
-    if (confirm("정말로 삭제하시겠습니까?")) {
+    if (confirm("삭제하시겠습니까?")) {
+      try {
+        const cardId = '{{ card._id }}';
+        const response = await fetch('/food/card/delete', {
+          method: 'POST',
+          body: new URLSearchParams({
+            'card_id': cardId
+          })
+        });
+        const data = await response.json();
 
-      // fetch('/food/card/delete', ...) 등
-      alert("삭제");
+        if (data.result === 'success') {
+          alert(data.message);
+          location.href = '/';
+        } else {
+          alert(data.message || '오류가 발생했습니다.');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('서버 연결에 실패했습니다.');
+      }
     }
   }
 </script>
+{% include "article_add.html" %}
 {% endblock %}
