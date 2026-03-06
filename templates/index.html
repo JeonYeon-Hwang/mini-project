@@ -96,8 +96,10 @@
                         <div class="flex items-center justify-end">
                             {% if user %}
                             <div class="flex items-center gap-3">
-                                <button type="button" onclick="location.href='/food/card/mylist'"
-                                    class="title px-5 py-4 w-48 break-words text-2xl text-center font-bold text-grey-900 bg-grey-500 rounded-full">
+                                <button
+                                    type="button"
+                                    onclick="document.getElementById('myCardsModal').showModal(); loadMyCards();"
+                                    class="title px-5 py-4 w-48 break-words text-2xl text-center font-bold text-grey-900 bg-grey-500 rounded-full hover:bg-grey-600 transition cursor-pointer">
                                     {{ user.nickname }} 님
                                 </button>
 
@@ -210,6 +212,39 @@
                 </form>
             </dialog>
 
+            <!-- 내 팟 목록 모달 -->
+            <dialog id="myCardsModal" class="p-0 w-[min(92vw,800px)] max-h-[80vh]">
+                <form method="dialog" class="p-0">
+                    <div class="flex flex-col p-6 gap-4 bg-white rounded-2xl shadow-xl max-h-[80vh] overflow-y-auto">
+                        <!-- 헤더 -->
+                        <div class="flex items-center justify-between mb-2 shrink-0">
+                            <h2 class="text-2xl font-semibold">내가 가입한 팟</h2>
+                            <button
+                                type="button"
+                                class="p-2 hover:bg-zinc-100 rounded-md"
+                                onclick="closeMyCardsModal()">
+                                ✕
+                            </button>
+                        </div>
+
+                        <!-- 로딩 표시 -->
+                        <div id="myCardsLoading" class="hidden text-center py-8">
+                            <p class="text-gray-500">로딩 중...</p>
+                        </div>
+
+                        <!-- 카드 목록 -->
+                        <div id="myCardsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- JavaScript로 동적 생성 -->
+                        </div>
+
+                        <!-- 빈 상태 -->
+                        <div id="myCardsEmpty" class="hidden text-center py-8">
+                            <p class="text-gray-500">아직 가입한 팟이 없습니다.</p>
+                        </div>
+                    </div>
+                </form>
+            </dialog>
+
             <!--카드 그리드-->
             <div id="cards-box" class="mt-5 grid grid -cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {% for card in cards %}
@@ -289,6 +324,80 @@
         function closeModal(modalEl) {
             modalEl.close();
             modalEl.querySelectorAll("form").forEach(form => form.reset());
+        }
+
+        // 내 팟 목록 로드
+        async function loadMyCards() {
+            const loading = document.getElementById('myCardsLoading');
+            const container = document.getElementById('myCardsContainer');
+            const empty = document.getElementById('myCardsEmpty');
+
+            // 초기화
+            loading.classList.remove('hidden');
+            container.innerHTML = '';
+            empty.classList.add('hidden');
+
+            try {
+                const response = await fetch('/food/my_cards');
+                const data = await response.json();
+
+                loading.classList.add('hidden');
+
+                if (data.result === 'success' && data.cards.length > 0) {
+                    // 카드 렌더링
+                    data.cards.forEach(card => {
+                        const cardHTML = createMyCardHTML(card);
+                        container.insertAdjacentHTML('beforeend', cardHTML);
+                    });
+                } else {
+                    empty.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('내 팟 로드 실패:', error);
+                loading.classList.add('hidden');
+                empty.classList.remove('hidden');
+            }
+        }
+
+        // 모달 닫기
+        function closeMyCardsModal() {
+            const modal = document.getElementById('myCardsModal');
+            modal.close();
+        }
+
+        // 모달용 카드 HTML 생성
+        function createMyCardHTML(card) {
+            return `
+                <div onclick="location.href='/food/${card._id}'"
+                     class="cursor-pointer rounded-2xl border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow">
+                    <!-- 카드 타입 이미지 -->
+                    <div class="mb-3">
+                        <img src="${card.card_type}" alt="음식 카테고리" class="w-full h-40 object-cover rounded-xl">
+                    </div>
+
+                    <!-- 제목 -->
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2 line-clamp-2">${card.card_title}</h3>
+
+                    <!-- 내용 -->
+                    <p class="text-gray-600 mb-3 line-clamp-2">${card.card_text}</p>
+
+                    <!-- 마감 시간 -->
+                    <div class="flex items-center gap-2 text-sm text-gray-500 mb-2">
+                        <span>⏰ ${card.card_duedate}</span>
+                    </div>
+
+                    <!-- 멤버 수 -->
+                    <div class="flex items-center gap-2 text-sm text-gray-500 mb-3">
+                        <span>👥 ${card.card_members.length}명</span>
+                    </div>
+
+                    <!-- 상태 배지 -->
+                    ${card.is_alive ?
+                        '<span class="inline-block px-2 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">모집 중</span>' :
+                        '<span class="inline-block px-2 py-1 text-xs font-semibold text-gray-800 bg-gray-100 rounded-full">마감됨</span>'
+                    }
+                </div>
+            `;
         }
 
         //paegnation
