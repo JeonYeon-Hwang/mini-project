@@ -81,6 +81,32 @@ def home():
                            user=user,
                            )
 
+
+
+
+@app.route('/food/card/mylist')
+def my_card_list():
+   user = get_current_user()
+
+   if not user:
+      return render_template('index.html', cards=[], user=None)
+
+   my_nickname = user.get('nickname')
+
+   cards = list(db.cards.find({'card_members': my_nickname})
+               .sort([('is_alive', -1), ('card_duedate', 1)]))
+
+   for card in cards:
+      card['_id'] = str(card['_id'])
+      card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
+      card['card_type'] = FOOD_IMAGE_MAP.get(card.get('card_type', ''))
+
+   return render_template('index.html',
+                           cards=cards,
+                           user=user,
+                           )
+
+
 #추가함 회원가입 api
 @app.route('/food/signin', methods=['POST'])
 def signin():
@@ -429,7 +455,6 @@ def exit_club():
       {'_id': ObjectId(card_id_receive)},
       {'$pull': {'card_members': remove_nickname}}
    )
-   
    return jsonify({'result': 'success', 'message': '탈퇴되었습니다.'})
 @app.route('/food/show_more/<int:page_num>')
 def show_more(page_num):

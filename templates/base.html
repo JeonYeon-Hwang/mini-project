@@ -95,10 +95,10 @@
                         <div class="flex items-center justify-end">
                             {% if user %}
                             <div class="flex items-center gap-3">
-                                <span
+                                <button type="button" onclick="location.href='/food/card/mylist'"
                                     class="title px-5 py-4 w-48 break-words text-2xl text-center font-bold text-grey-900 bg-grey-500 rounded-full">
                                     {{ user.nickname }} 님
-                                </span>
+                                </button>
 
                                 <form method="post" action="{{ url_for('logout') }}">
                                     <button type="submit"
