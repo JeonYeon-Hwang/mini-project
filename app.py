@@ -515,7 +515,7 @@ def show_more(page_num):
 #스캐줄러 메서드 입니다
 def scheduled_job():
    print("스캐줄링 작동")
-   now = int(time.time()) + (9 * 3600)
+   now = int(time.time()) 
    result = db.cards.update_many(
         {'card_duedate': {'$lte': now}},
         {'$set': {'is_alive': False}}
