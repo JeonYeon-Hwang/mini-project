@@ -431,16 +431,40 @@ def exit_club():
    )
    
    return jsonify({'result': 'success', 'message': '탈퇴되었습니다.'})
+# 내가 가입한 팟 목록 조회
+@app.route('/food/my_cards', methods=['GET'])
+def get_my_cards():
+   user = get_current_user()
+   if not user:
+      return jsonify({'result': 'fail', 'message': '로그인이 필요합니다'})
+
+   nickname = user['nickname']
+
+   # 내가 가입한 팟 조회 (card_members 배열에 내 닉네임이 포함된 팟)
+   my_cards = list(db.cards.find({
+      'card_members': nickname
+   }).sort([('is_alive', -1), ('card_duedate', 1)]))
+
+   # 데이터 포맷팅 (기존 show_cards()와 동일한 방식)
+   for card in my_cards:
+      card['_id'] = str(card['_id'])
+      if card.get('card_duedate'):
+         card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
+      if card.get('card_type'):
+         card['card_type'] = FOOD_IMAGE_MAP.get(card['card_type'])
+
+   return jsonify({'result': 'success', 'cards': my_cards})
+
 @app.route('/food/show_more/<int:page_num>')
 def show_more(page_num):
    limit = 9
    skip_value = (page_num - 1) * limit
-   
+
    cards = list(db.cards.find({})
-               .sort([('is_alive', -1), ('card_duedate', 1)]) 
-               .skip(skip_value)   
+               .sort([('is_alive', -1), ('card_duedate', 1)])
+               .skip(skip_value)
                .limit(limit))
-   
+
    for card in cards:
       card['_id'] = str(card['_id'])
       if card.get('card_duedate'):
@@ -451,8 +475,8 @@ def show_more(page_num):
    has_more = len(cards) == limit
 
    return jsonify({
-      "result": "success", 
-      "cards": cards, 
+      "result": "success",
+      "cards": cards,
       "has_more": has_more
    })
 
