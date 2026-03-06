@@ -81,6 +81,32 @@ def home():
                            user=user,
                            )
 
+
+
+
+@app.route('/food/card/mylist')
+def my_card_list():
+   user = get_current_user()
+
+   if not user:
+      return render_template('index.html', cards=[], user=None)
+
+   my_nickname = user.get('nickname')
+
+   cards = list(db.cards.find({'card_members': my_nickname})
+               .sort([('is_alive', -1), ('card_duedate', 1)]))
+
+   for card in cards:
+      card['_id'] = str(card['_id'])
+      card['card_duedate'] = time.strftime('%Y-%m-%d %H:%M', time.localtime(card['card_duedate']))
+      card['card_type'] = FOOD_IMAGE_MAP.get(card.get('card_type', ''))
+
+   return render_template('index.html',
+                           cards=cards,
+                           user=user,
+                           )
+
+
 #추가함 회원가입 api
 @app.route('/food/signin', methods=['POST'])
 def signin():
@@ -429,7 +455,6 @@ def exit_club():
       {'_id': ObjectId(card_id_receive)},
       {'$pull': {'card_members': remove_nickname}}
    )
-   
    return jsonify({'result': 'success', 'message': '탈퇴되었습니다.'})
 # 내가 가입한 팟 목록 조회
 @app.route('/food/my_cards', methods=['GET'])
@@ -490,17 +515,19 @@ def show_more(page_num):
 #스캐줄러 메서드 입니다
 def scheduled_job():
    print("스캐줄링 작동")
-
-   now = int(time.time())
-   db.cards.update_many(
-      {'card_duedate' : {'$lte' : now }},
-      {'$set' : { 'is_alive' : False}}
+   now = int(time.time()) + (9 * 3600)
+   result = db.cards.update_many(
+        {'card_duedate': {'$lte': now}},
+        {'$set': {'is_alive': False}}
    )
+   print(f"현재 시간: {now}") 
+   print(f"매칭된 문서 개수: {result.matched_count}")
+   print(f"실제 수정된 문서 개수: {result.modified_count}")
          
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(scheduled_job, 'interval', seconds=180)
+scheduler.add_job(scheduled_job, 'interval', seconds=120)
 scheduler.start()
 
 
