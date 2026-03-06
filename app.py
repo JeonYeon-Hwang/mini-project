@@ -509,4 +509,4 @@ if __name__ == '__main__':
    #app.run('0.0.0.0', port=5001, debug=True)
 
    #소켓 실행
-    socketio.run(app, '0.0.0.0', port=5001, debug=True)
+    socketio.run(app, '0.0.0.0', port=5001, debug=True, allow_unsafe_werkzeug=True)
