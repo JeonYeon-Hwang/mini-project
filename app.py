@@ -515,17 +515,19 @@ def show_more(page_num):
 #스캐줄러 메서드 입니다
 def scheduled_job():
    print("스캐줄링 작동")
-
-   now = int(time.time())
-   db.cards.update_many(
-      {'card_duedate' : {'$lte' : now }},
-      {'$set' : { 'is_alive' : False}}
+   now = int(time.time()) + (9 * 3600)
+   result = db.cards.update_many(
+        {'card_duedate': {'$lte': now}},
+        {'$set': {'is_alive': False}}
    )
+   print(f"현재 시간: {now}") 
+   print(f"매칭된 문서 개수: {result.matched_count}")
+   print(f"실제 수정된 문서 개수: {result.modified_count}")
          
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(scheduled_job, 'interval', seconds=180)
+scheduler.add_job(scheduled_job, 'interval', seconds=3)
 scheduler.start()
 
 
