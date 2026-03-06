@@ -527,7 +527,7 @@ def scheduled_job():
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(scheduled_job, 'interval', seconds=3)
+scheduler.add_job(scheduled_job, 'interval', seconds=120)
 scheduler.start()
 
 
