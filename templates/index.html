@@ -96,10 +96,10 @@
                         <div class="flex items-center justify-end">
                             {% if user %}
                             <div class="flex items-center gap-3">
-                                <span
+                                <button type="button" onclick="location.href='/food/card/mylist'"
                                     class="title px-5 py-4 w-48 break-words text-2xl text-center font-bold text-grey-900 bg-grey-500 rounded-full">
                                     {{ user.nickname }} 님
-                                </span>
+                                </button>
 
                                 <form method="post" action="{{ url_for('logout') }}">
                                     <button type="submit"
@@ -301,9 +301,9 @@
 
         let loading = false;
         let hasMore = true;
-        // let snapshotTime = {{ snapshot_time | tojson}};
+        // let snapshotTime = {{ snapshot_time | default(none) | tojson }};
 
-        // nextCursor.value= {{ cursor | tojson}};
+        // nextCursor.value= {{ cursor | default(none) | tojson }};
 
         //$(document).ready(function(){
         //    loadMore();
@@ -466,6 +466,61 @@
     </div>
 
     {% include "article_add.html" %}
+
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script>
+        const indexSocket = io();
+
+        indexSocket.on('member_count_updated', data => {
+            const { card_id, count } = data;
+            const cardEl = document.querySelector(`[data-card-id="${card_id}"]`);
+            if (cardEl) {
+                const countEl = cardEl.querySelector('.member-count-display');
+                if (countEl) countEl.textContent = count;
+            }
+        });
+
+        indexSocket.on('card_deleted', data => {
+            const { card_id } = data;
+            const cardEl = document.querySelector(`[data-card-id="${card_id}"]`);
+            if (cardEl) {
+                cardEl.remove();
+            }
+        });
+
+        indexSocket.on('card_created', async () => {
+            const box = document.getElementById('cards-box');
+            if (!box) return;
+
+            // 현재 화면에 렌더된 카드 수 + 1 만큼 요청
+            const currentCount = box.querySelectorAll('[data-card-id]').length;
+            const fetchLimit = currentCount + 1;
+
+            // 현재 카테고리 필터 유지
+            const params = new URLSearchParams(window.location.search);
+            const category = params.get('category') || '';
+
+            const qs = new URLSearchParams({ limit: fetchLimit });
+            if (category) qs.set('category', category);
+
+            try {
+                const res = await fetch(`/food/cards/refresh?${qs.toString()}`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data.result !== 'success' || !data.cards) return;
+
+                // cards-box 전체 교체
+                box.innerHTML = data.cards.map(card => createCardHTML(card)).join('');
+                startCountdowns();
+            } catch (e) {
+                console.error('card_created refresh failed:', e);
+            }
+        });
+    </script>
+
 </body>
 
 </html>
